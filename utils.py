@@ -23,3 +23,20 @@ def remove_pos(lst, used_pos = ["VERB", "ADJ", "NOUN"]):
         new_lst.append(new_string)
         
     return new_lst
+
+
+lsvm_grid1 = GridSearchCV(lsvm_pipe, 
+                            lsvm_parameters,
+                            cv=cv, 
+                            error_score=0.0,
+                            n_jobs=args.n_jobs,
+                            scoring="f1_macro")
+
+    lsvm_grid2 = GridSearchCV(lsvm_pipe,
+                                lsvm_parameters,
+                                cv=cv, 
+                                error_score=0.0,
+                                n_jobs=args.n_jobs,
+                                scoring="f1_macro")
+
+
