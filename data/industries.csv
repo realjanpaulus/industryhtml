@@ -1,0 +1,148 @@
+industry,group,industry_label,group_representative
+65,agr,Dairy,63
+63,agr,Farming,63
+64,agr,Ranching,63
+66,agr,Fishery,63
+127,"art, med",Animation,99
+140,"art, med",Graphic Design,99
+99,"art, med",Design,99
+38,"art, med, rec",Fine Art,38
+37,"art, med, rec",Museums and Institutions,38
+39,"art, med, rec",Performing Arts,38
+103,"art, med, rec",Writing and Editing,38
+35,"art, med, rec",Motion Pictures and Film,38
+111,"art, med, rec",Arts and Crafts,38
+136,"art, med, rec",Photography,38
+115,"art, rec",Music,115
+48,cons,Construction,48
+49,cons,Building Materials,48
+50,cons,Architecture & Planning,48
+128,"cons, fin, good",Commercial Real Estate,44
+44,"cons, fin, good",Real Estate,44
+51,"cons, gov",Civil Engineering,51
+135,"cons, gov, man",Mechanical or Industrial Engineering,135
+147,"cons, man",Industrial Automation,147
+145,"cons, man","Glass, Ceramics & Concrete",147
+105,"corp, coaching",Professional Training & Coaching,105
+11,"corp, consulting",Management Consulting,11
+47,"corp, fin",Accounting,47
+134,"corp, good, tran",Import and Export,134
+108,"corp, gov, serv",Translation and Localization,108
+137,"corp, human",Human Resources,137
+138,"corp, man",Business Supplies and Equipment,138
+97,"corp, market",Market Research,97
+80,"corp, med",Marketing and Advertising,80
+102,"corp, org",Program Development,102
+121,"corp, org, serv",Security and Investigations,121
+123,"corp, outsourcing",Outsourcing/Offshoring,123
+98,"corp, pr",Public Relations and Communications,98
+110,"corp, rec, serv",Events Services,110
+122,"corp, serv",Facilities Services,122
+104,"corp, staffing",Staffing and Recruiting,104
+116,"corp, tran",Logistics and Supply Chain,116
+67,edu,Primary/Secondary Education,68
+69,edu,Education Management,68
+68,edu,Higher Education,68
+70,edu,Research,68
+132,edu,E-Learning,68
+106,fin,Venture Capital & Private Equity,43
+46,fin,Investment Management,43
+45,fin,Investment Banking,43
+43,fin,Financial Services,43
+41,fin,Banking,43
+129,fin,Capital Markets,43
+42,"fin, ins",Insurance,42
+18,good,Cosmetics,133
+143,good,Luxury Goods & Jewelry,133
+19,good,Apparel & Fashion,133
+22,good,Supermarkets,133
+133,good,Wholesale,133
+21,good,Tobacco,133
+25,"good, man",Consumer Goods,25
+26,"good, man",Furniture,25
+24,"good, man",Consumer Electronics,25
+146,"good, man",Packaging and Containers,25
+112,"good, man",Electrical/Electronic Manufacturing,25
+27,"good, man",Retail,25
+142,"good, man, rec",Wine and Spirits,142
+23,"good, man, serv",Food Production,23
+20,"good, rec",Sporting Goods,20
+75,gov,Government Administration,75
+74,gov,International Affairs,75
+76,gov,Executive Office,75
+148,gov,Government Relations,75
+78,gov,Public Safety,75
+71,gov,Military,75
+79,gov,Public Policy,75
+12,"gov, hlth, tech",Biotechnology,12
+77,"gov, leg",Law Enforcement,77
+72,"gov, leg",Legislative Office,77
+73,"gov, leg",Judiciary,77
+52,"gov, man",Aviation & Aerospace,52
+144,"gov, man, org",Renewables & Environment,144
+114,"gov, man, tech",Nanotechnology,114
+130,"gov, org",Think Tanks,107
+107,"gov, org",Political Organization,107
+141,"gov, org",International Trade and Development,107
+1,"gov, tech",Defense & Space,8
+8,"gov, tech",Telecommunications,8
+15,hlth,Pharmaceuticals,13
+124,hlth,"Health, Wellness and Fitness",13
+125,hlth,Alternative Medicine,13
+14,hlth,Hospital & Health Care,13
+139,hlth,Mental Health Care,13
+13,hlth,Medical Practice,13
+17,hlth,Medical Devices,13
+16,hlth,Veterinary,13
+10,leg,Legal Services,10
+9,leg,Law Practice,10
+120,"leg, org",Alternative Dispute Resolution,120
+61,man,Paper & Forest Products,55
+58,man,Shipbuilding,55
+59,man,Utilities,55
+60,man,Textiles,55
+62,man,Railroad Manufacture,55
+55,man,Machinery,55
+56,man,Mining & Metals,55
+57,man,Oil & Energy,55
+53,"man, auto",Automotive,53
+54,"man, chem",Chemicals,54
+117,"man, plastics",Plastics,117
+94,"man, tech, tran",Airlines/Aviation,94
+113,med,Online Media,126
+109,"med, rec",Computer Games,126
+28,"med, rec",Entertainment,126
+83,"med, rec",Printing,126
+36,"med, rec",Broadcast Media,126
+81,"med, rec",Newspapers,126
+126,"med, rec",Media Production,126
+82,"med, rec",Publishing,126
+85,"med, rec, serv",Libraries,85
+84,"med, serv",Information Services,84
+101,org,Fund-Raising,100
+131,org,Philanthropy,100
+100,org,Non-Profit Organization Management,100
+88,"org, serv",Individual & Family Services,90
+89,"org, serv",Religious Institutions,90
+91,"org, serv",Consumer Services,90
+90,"org, serv",Civic & Social Organization,90
+86,"org, serv",Environmental Services,90
+29,"rec, gambling",Gambling & Casinos,29
+40,"rec, serv",Recreational Facilities and Services,40
+32,"rec, serv",Restaurants,40
+34,"rec, serv",Food & Beverages,40
+30,"rec, serv, tran","Leisure, Travel & Tourism",30
+31,"rec, serv, tran",Hospitality,30
+33,"rec, sports",Sports,33
+87,"serv, tran",Package/Freight Delivery,87
+5,tech,Computer Networking,96
+119,tech,Wireless,96
+3,tech,Computer Hardware,96
+118,tech,Computer & Network Security,96
+4,tech,Computer Software,96
+7,tech,Semiconductors,96
+96,tech,Information Technology and Services,96
+6,tech,Internet,96
+95,tran,Maritime,92
+92,tran,Transportation/Trucking/Railroad,92
+93,tran,Warehousing,92
