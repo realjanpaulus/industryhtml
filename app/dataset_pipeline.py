@@ -73,7 +73,7 @@ def main():
     train.to_csv(TRAIN_PATH_CSV, index=False)
     test.to_csv(TEST_PATH_CSV, index=False)
 
-    
+    # output time
     print(get_execution_duration(float(time.time() - program_start)))
 
 if __name__ == "__main__":
