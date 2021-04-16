@@ -131,6 +131,8 @@ dmypy.json
 # mine
 .vscode/
 old/
+data/old
+data/data.ndjson
 data/train.csv
 data/test.csv
 data/train.ndjson

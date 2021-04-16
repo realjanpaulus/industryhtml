@@ -4,6 +4,7 @@ import time
 
 import numpy as np
 import pandas as pd
+from sklearn.model_selection import train_test_split
 
 def get_code(code_list, identifier):
     """ Get code by code list and identifier."""
@@ -21,55 +22,48 @@ def get_execution_duration(duration):
     minutes = int(duration//60)
     seconds = int(duration - 60*minutes)
 
-    def double_zero(element):
-        if element == 0:
-            return "00"
+    def zero_digit(element):
+        if element < 10:
+            if element == 0:
+                return "00"
+            else:
+                return f"0{element}"
         else:
             return element
 
-    return f"Total duration: {double_zero(hours)}:{double_zero(minutes)}:{double_zero(seconds)}"
+    return f"Total duration: {zero_digit(hours)}:{zero_digit(minutes)}:{zero_digit(seconds)}"
 
 def main():
     # time management
     program_start = time.time()
-    
-    INDUSTRY_CODES_PATH = args.path + "linkedin-industry-codes.json"
-    TRAIN_PATH_JSON = args.path + "train.ndjson"
-    TEST_PATH_JSON = args.path + "test.ndjson"
+
+    INDUSTRY_CODES_PATH = args.path + "industries.csv"
+    DATA_PATH_JSON = args.path + "data.ndjson"
     TRAIN_PATH_CSV = args.path + "train.csv"
     TEST_PATH_CSV = args.path + "test.csv"
-
-
-    # load into dataframes
-    train_records = map(json.loads, open(TRAIN_PATH_JSON))
-    train = pd.DataFrame.from_records(train_records)
+    TEST_SIZE = args.test_size
     
-    test_records = map(json.loads, open(TEST_PATH_JSON))
-    test = pd.DataFrame.from_records(test_records)
+    print("Loading ndjson.")
+    data_records = map(json.loads, open(DATA_PATH_JSON))
+    data = pd.DataFrame.from_records(data_records)
 
+    if not args.ignore_country:
+        print("Extract and appending country information.")
+        from langdetect import detect
 
-    # add industry codes to train
-    with open(INDUSTRY_CODES_PATH) as f:
-        industry_codes = json.load(f)
+        tmp_data = data.copy()
+        tmp_data["country"] = tmp_data.apply(lambda row: detect(row.text).upper(), axis=1)
+        data = tmp_data.copy()
+
+    codes = pd.read_csv(INDUSTRY_CODES_PATH)
+    data["group_representative_label"] = data.apply(lambda row: codes.iloc[row.group_representative].industry_label, axis=1)
+
+    print("Splitting data.")
+    train, test = train_test_split(data, test_size=TEST_SIZE, stratify=data.industry)
+            
         
-    train["industry_name"] = list(map(lambda x: get_code(industry_codes, x), 
-                                        dict(train["industry"]).values()))
-
-    
-    # remove empty text, html, industry and industry_name cols
-    train = train.drop(train[train['text'] == ''].index)
-    train = train.drop(train[train['html'] == ''].index)
-    train = train.drop(train[train['industry_name'] == ''].index)
-
-    train["country"] = train["country"].replace(np.nan, "UNKNOWN")
-    train["country"] = train["country"].replace(" ", "UNKNOWN")
-    train["country"] = train["country"].replace("", "UNKNOWN")
-
-    test = test.drop(test[test['text'] == ''].index)
-    test = test.drop(test[test['html'] == ''].index)
-
-
     # save to csv
+    print("Saving data.")
     train.to_csv(TRAIN_PATH_CSV, index=False)
     test.to_csv(TEST_PATH_CSV, index=False)
 
@@ -81,8 +75,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog="dataset_pipeline", 
                                     description="Pipeline for creating datasets.")
     parser.add_argument("--path", "-p", type=str, default="../data/", 
-                                    help="Path to dataset ndjson files.")
-    
+                        help="Path to dataset ndjson file.")
+    parser.add_argument("--ignore_country", "-ic", action="store_true", 
+                        help="Ignore addition of ISO2 country code to shorten the runtime.")
+    parser.add_argument("--test_size", "-ts", type=float, default=0.2, help="Set test size.")
     args = parser.parse_args()
 
     main()
