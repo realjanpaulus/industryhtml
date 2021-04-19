@@ -59,7 +59,10 @@ def main():
     data["group_representative_label"] = data.apply(lambda row: codes.iloc[row.group_representative].industry_label, axis=1)
 
     print("Splitting data.")
-    train, test = train_test_split(data, test_size=TEST_SIZE, stratify=data.industry)
+    train, test = train_test_split(data, 
+                                    test_size=TEST_SIZE, 
+                                    stratify=data.industry, 
+                                    random_state=42)
             
         
     # save to csv
