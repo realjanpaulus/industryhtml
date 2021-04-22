@@ -138,7 +138,7 @@ data/*.7z
 data/*.rar
 data/clean-websites.7z
 data/data.ndjson
-data/train.csv
-data/test.csv
-data/train.ndjson
-data/test.ndjson
+data/train*.csv
+data/test*.csv
+data/train*.ndjson
+data/test*.ndjson
