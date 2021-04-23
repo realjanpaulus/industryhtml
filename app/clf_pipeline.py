@@ -10,13 +10,52 @@ import numpy as np
 import pandas as pd
 
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics import (confusion_matrix, classification_report, f1_score, 
-                            precision_score, recall_score)
+from sklearn.metrics import (
+    confusion_matrix,
+    classification_report,
+    f1_score,
+    precision_score,
+    recall_score,
+)
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import LabelEncoder
 from sklearn.svm import LinearSVC
 
 from stop_words import get_stop_words
+
+
+def parse_arguments():
+    """Initialize argument parser and return arguments."""
+
+    parser = argparse.ArgumentParser(
+        prog="clf_pipeline", description="Pipeline for ML classification."
+    )
+    parser.add_argument(
+        "--path", "-p", type=str, default="../data/", help="Path to dataset csv files."
+    )
+    parser.add_argument(
+        "--clean_html",
+        "-ch",
+        action="store_true",
+        help="Indicates if HTML boilerplate removal should be applied.",
+    )
+    parser.add_argument(
+        "--specific_country",
+        "-sc",
+        type=str,
+        default="",
+        help="Load dataset with only given ISO2 country code.",
+    )
+    parser.add_argument(
+        "--text_col",
+        "-tc",
+        type=str,
+        default="html",
+        help="Indicating the column with text.",
+    )
+
+    return parser.parse_args()
+
 
 def main():
 
@@ -40,7 +79,7 @@ def main():
     CLASS_NAMES = "group_representative_label"
 
     # vectorizer settings
-    MAX_DOCUMENT_FREQUENCY = 1.
+    MAX_DOCUMENT_FREQUENCY = 1.0
     MAX_FEATURES = None
     LOWERCASE = False
     STOP_WORDS = get_stop_words("de")
@@ -48,7 +87,6 @@ def main():
     # HTML boilerplate removal
     if TEXT_COL == "html":
         USE_CLEAN_HTML = args.clean_html
-
 
     ### LOGGER ###
     Path("logs").mkdir(parents=True, exist_ok=True)
@@ -58,29 +96,14 @@ def main():
     console.setLevel(logging.INFO)
     formatter = logging.Formatter("%(levelname)s: %(message)s")
     console.setFormatter(formatter)
-    logging.getLogger('').addHandler(console)
-
-
-
+    logging.getLogger("").addHandler(console)
 
     ### PROGRAM DURATION ###
     DURATION = float(time.time() - START_TIME)
     logging.info(f"Run-time: {int(DURATION)/60} minute(s).")
 
 
-
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(prog="clf_pipeline", 
-                                    description="Pipeline for ML classification.")
-    parser.add_argument("--path", "-p", type=str, default="../data/", 
-                                    help="Path to dataset csv files.")
-    parser.add_argument("--clean_html", "-ch", action="store_true", 
-                        help="Indicates if HTML boilerplate removal should be applied.")
-    parser.add_argument("--specific_country", "-sc", type=str, default="", 
-                        help="Load dataset with only given ISO2 country code.")
-    parser.add_argument("--text_col", "-tc", type=str, default="html",
-                        help="Indicating the column with text.")
 
-    args = parser.parse_args()
-
-    main()
+    args = parse_arguments()
+    main(args)
