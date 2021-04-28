@@ -25,7 +25,7 @@ from stop_words import get_stop_words
 
 
 def parse_arguments():
-    """Initialize argument parser and return arguments."""
+    """ Initialize argument parser and return arguments."""
 
     parser = argparse.ArgumentParser(
         prog="clf_pipeline", description="Pipeline for ML classification."

@@ -42,7 +42,7 @@ def get_execution_duration(duration):
 
 
 def parse_arguments():
-    """Initialize argument parser and return arguments."""
+    """ Initialize argument parser and return arguments."""
 
     parser = argparse.ArgumentParser(
         prog="dataset_pipeline", description="Pipeline for creating datasets."
