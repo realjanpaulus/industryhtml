@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-from utils import clean_html_boilerplate
+from utils import clean_boilerplate
 
 
 def get_code(code_list, identifier):
@@ -55,10 +55,10 @@ def parse_arguments():
         help="Path to dataset ndjson file.",
     )
     parser.add_argument(
-        "--clean_html",
-        "-ch",
+        "--clean_boilerplate",
+        "-cb",
         action="store_true",
-        help="Indicates if HTML boilerplate removal should be applied.",
+        help="Indicates if HTML, XHTML or XML boilerplate removal should be applied.",
     )
     parser.add_argument(
         "--ignore_country",
@@ -146,9 +146,11 @@ def main(args):
             )
 
     ### remove boilerplate html code ###
-    if args.clean_html:
-        logging.info("Cleaning HTML boilerplate...")
-        data["html"] = data.apply(lambda row: clean_html_boilerplate(row), axis=1)
+    if args.clean_boilerplate:
+        logging.info("Cleaning HTML/XHTML/XML boilerplate...")
+        data["html"] = data.apply(
+            lambda row: clean_boilerplate(row.html, row.url), axis=1
+        )
 
     logging.info("Splitting data.")
     train, test = train_test_split(
