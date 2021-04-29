@@ -1,14 +1,19 @@
 import re
 from typing import Dict, List, Optional, Tuple, Union
+from unicodedata import normalize
 
+import lxml
 from lxml.html.clean import Cleaner
 from lxml import html, etree
 import numpy as np  # todo: nötig?
 import pandas as pd  # todo: nötig?
 
 
-def clean_boilerplate(string: str, url: str, website_type: Optional[str] = None) -> str:
-    """Cleans boilerplate tags, attributes etc. from HTML, XHTML or XML.
+def clean_boilerplate(string: str, url: str, markup_type: Optional[str] = None) -> str:
+    """Cleans boilerplate tags, attributes etc. from a valid website as string
+        (HTML, XHTML or XML). The markup type will be detected.
+        A lxml html Cleaner will be set. If the detection fails, another cleaning
+        attempt will be made by setting another markup type.
 
     Parameters
     ----------
@@ -16,8 +21,8 @@ def clean_boilerplate(string: str, url: str, website_type: Optional[str] = None)
         String which contains the HTML, XHTML or XML.
     url : str
         String which contains the websites URL.
-    website_type : str, default=None
-        Pass website type directly.
+    markup_type : str, default=None
+        Indicate the markup type ('xml' or another).
 
     Returns
     -------
@@ -52,31 +57,14 @@ def clean_boilerplate(string: str, url: str, website_type: Optional[str] = None)
 
     string = string[string.find("<") :]
 
-    if not website_type:
-        website_type = detect_XML(string)
-
-    # todo außerhalb?
-    # todo docstring
-    def clean_website(string, cleaner, website_type):
-        """ TODO"""
-        # XML
-        if website_type == "xml":
-            parser = etree.XMLParser(encoding="utf-8", recover=True)
-            tree = etree.fromstring(string.encode("utf-8"), parser=parser)
-        # HTML and XHTML
-        else:
-            parser = html.HTMLParser(encoding="utf-8")
-            tree = html.fromstring(string.encode("utf-8"), parser=parser)
-        string = etree.tostring(tree, encoding="unicode")
-        clean = cleaner.clean_html(string)
-        return clean
-
+    if not markup_type:
+        markup_type = detect_XML(string)
     try:
-        clean = clean_website(string, cleaner, website_type)
+        clean = clean_website(string, cleaner, markup_type)
     except:
         # try the other (not detected) website type
         try:
-            if website_type == "xml":
+            if markup_type == "xml":
                 clean = clean_website(string, cleaner, "html")
             else:
                 clean = clean_website(string, cleaner, "xml")
@@ -93,8 +81,44 @@ def clean_boilerplate(string: str, url: str, website_type: Optional[str] = None)
     return clean
 
 
-def detect_XML(string):
-    """ Detect XML by XML declaration."""
+def clean_website(
+    string: str, cleaner: lxml.html.clean.Cleaner, markup_type: str
+) -> str:
+    """Cleans boilerplate tags, attributes etc. from a valid website as string
+        (HTML, XHTML or XML). A lxml html Cleaner has to be passed.
+
+    Parameters
+    ----------
+    string : str
+        String which contains the HTML, XHTML or XML.
+    cleaner : str
+        String which contains the websites URL.
+    markup_type : str, default=None
+        Indicate the markup type ('xml' or another).
+
+    Returns
+    -------
+    clean : str
+        Cleaned HTML, XHTML or XML string.
+    """
+    # XML
+    if markup_type == "xml":
+        parser = etree.XMLParser(
+            encoding="utf-8", ns_clean=True, recover=True, remove_comments=True
+        )
+        tree = etree.fromstring(string.encode("utf-8"), parser=parser)
+    # HTML and XHTML
+    else:
+        parser = html.HTMLParser(encoding="utf-8")
+        tree = html.fromstring(string.encode("utf-8"), parser=parser)
+    string = etree.tostring(tree, encoding="unicode")
+    clean = cleaner.clean_html(string)
+
+    return normalize("NFKD", clean)
+
+
+def detect_XML(string: str) -> str:
+    """ Detect XML by XML declaration and returns a markup type string."""
     if string.startswith("<?xml"):
         return "xml"
     else:
@@ -136,12 +160,43 @@ def tokenizing_html(text: str, token_list: Optional[List[str]] = []) -> List[str
         return tokens
 
 
-# TODO docstring
-# TODO: allow xml
-def trim_html(html_string, tag_list=[], tagless_output_string=False, return_tree=False):
-    """ Trim a html string file by removing all tags which are not inside the tag list."""
+# TODO: allow xml. ICH: ?
+def trim_html(
+    html_string: str,
+    clean_html: Optional[bool] = True,
+    keep_tags: Optional[bool] = False,
+    tag_list: Optional[list] = None,
+    return_tree: Optional[bool] = False,
+):
+    """Trim a html string file by removing all tags which are not inside the tag list.
 
+    Parameters
+    ----------
+    html_string : str
+        String which contains the HTML.
+    clean_html : bool, default=True
+        Indicates if the html string should be cleaned. Could prevent errors.
+    keep_tags : bool, default=False
+        Indicates if tags should be removed or kept.
+    tag_list : list, default=None
+        List with tags which should be removed.
+    return_tree : boo, default=False
+        Indicates if lxml tree object or a string should be returned.
+
+    Returns
+    -------
+    lxml.html.HtmlElement/string
+        Returns trimmed tree or string.
+
+    """
+
+    if tag_list is None:
+        tag_list = []
+
+    if clean_html:
+        html_string = clean_boilerplate(html_string, "")
     tree = html.fromstring(html_string)
+    print(type(tree))
     unique_tags = list(np.unique([element.tag for element in tree.iter()]))
     unique_tags = [element for element in unique_tags if element not in tag_list]
 
@@ -150,7 +205,7 @@ def trim_html(html_string, tag_list=[], tagless_output_string=False, return_tree
     if return_tree:
         return tree
     else:
-        if tagless_output_string:
-            return remove_tags(tree)
-        else:
+        if keep_tags:
             return etree.tostring(tree, encoding="unicode", method="html")
+        else:
+            return remove_tags(tree)
