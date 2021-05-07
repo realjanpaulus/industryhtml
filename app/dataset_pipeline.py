@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-from utils import clean_boilerplate
+from utils import clean_boilerplate, detect_XML, extract_meta_informations
 
 
 def get_code(code_list, identifier):
@@ -67,6 +67,13 @@ def parse_arguments():
         help="Ignore addition of ISO2 country code to shorten the runtime.",
     )
     parser.add_argument(
+        "--max_rows",
+        "-mr",
+        type=int,
+        default=None,
+        help="Sets maximum number of rows (default: None)."
+    )
+    parser.add_argument(
         "--specific_country",
         "-sc",
         type=str,
@@ -84,10 +91,14 @@ def main(args):
     START_TIME = time.time()
     START_DATE = f"{datetime.now():%d.%m.%y}_{datetime.now():%H:%M:%S}"
 
+    ROWS = ""
+    if args.max_rows:
+        ROWS = "_" + str(args.max_rows)
+
+    LANG = ""
     if len(args.specific_country) >= 1:
         LANG = "_" + args.specific_country
-    else:
-        LANG = ""
+
 
     CLASS_COL = "group_representative"
     CLASS_COL_LABEL = "group_representative_label"
@@ -96,9 +107,9 @@ def main(args):
     DATA_PATH_JSON = DATA_DIR_PATH + "data.ndjson"
     INDUSTRY_CODES_PATH = DATA_DIR_PATH + "industries"
 
-    TRAIN_PATH_CSV = DATA_DIR_PATH + "train" + LANG + ".csv"
-    TEST_PATH_CSV = DATA_DIR_PATH + "test" + LANG + ".csv"
-    TEST_URL_TXT = args.path + "testurls" + LANG + ".txt"
+    TRAIN_PATH_CSV = DATA_DIR_PATH + "train" + LANG + ROWS + ".csv"
+    TEST_PATH_CSV = DATA_DIR_PATH + "test" + LANG + ROWS + ".csv"
+    TEST_URL_TXT = args.path + "testurls" + LANG + ROWS + ".txt"
     TEST_SIZE = args.test_size
 
     ### logger ###
@@ -113,7 +124,7 @@ def main(args):
 
     logging.info("Loading ndjson.")
     data_records = map(json.loads, open(DATA_PATH_JSON))
-    data = pd.DataFrame.from_records(data_records)
+    data = pd.DataFrame.from_records(data_records, nrows=args.max_rows)
 
     ### add country information ###
     if not args.ignore_country:
@@ -126,6 +137,7 @@ def main(args):
         )
         data = tmp_data.copy()
 
+    ### add industry codes ###
     codes = pd.read_csv(INDUSTRY_CODES_PATH + ".csv")
     data[CLASS_COL_LABEL] = data.apply(
         lambda row: list(codes[codes["industry"] == row[CLASS_COL]].industry_label)[0],
@@ -144,6 +156,13 @@ def main(args):
                 f"WARNING: Country code {args.specific_country} is not in the dataset, \
                 all countries will be kept!"
             )
+
+    ### extract meta tags ###
+    logging.info("Extract informations from <meta> tags.")
+    data["meta"] = data.apply(
+        lambda row: " ".join(extract_meta_informations(row.html, detect_XML(row.html))),
+        axis=1,
+    )
 
     ### remove boilerplate html code ###
     if args.clean_boilerplate:
