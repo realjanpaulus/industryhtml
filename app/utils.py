@@ -80,11 +80,22 @@ def clean_boilerplate(
                 f"Website '{url}' couldn't be cleaned (variable type: {type(string)})."
             )
 
-    clean = clean.replace("\n", "")
-    clean = clean.replace("\r", "")
-    clean = clean.replace("\t", "")
-
     return clean
+
+
+def clean_string(string: str):
+    """ Cleans the following things from string:
+        - new line '\n'
+        - carriage return '\r'
+        - tab '\t'
+        - duplicate whitespace
+    """
+    string = string.replace("\n", "")
+    string = string.replace("\r", "")
+    string = string.replace("\t", "")
+    string = reduce_whitespace(string)
+
+    return string
 
 
 def clean_website(
@@ -113,6 +124,7 @@ def clean_website(
 
     return normalize("NFKD", clean)
 
+
 def detect_XML(string: str) -> str:
     """ Detect XML by XML declaration and returns a markup type string."""
     if string.startswith("<?xml"):
@@ -121,10 +133,11 @@ def detect_XML(string: str) -> str:
         return "html"
 
 
-# TODO: DOCSTRING
-def extract_meta_informations(string, markup_type):
-    """ TODO"""
-    # title bereits in text dabei
+def extract_meta_informations(string: str, markup_type: str) -> list:
+    """ Extracts meta information from 'description'- and 'keyword'-
+        meta elements and returns the content in a list.
+    """
+    # title already in text
     tags = ['meta[property="og:description"]',
             'meta[name="description"]',
             'meta[property="og:keyword"]',
@@ -132,7 +145,6 @@ def extract_meta_informations(string, markup_type):
 
     tags = ", ".join(tags)
 
-    # TODO: bessere Lösung?
     try:
         tree = extract_tree(string, markup_type)
         select = CSSSelector(tags, translator=markup_type)
@@ -141,6 +153,7 @@ def extract_meta_informations(string, markup_type):
         return list(set(results))
     except:
         return [""]
+
 
 def extract_tree(string: str, markup_type: str) -> lxml.etree._Element:
     """ Extracts tree from string.
@@ -156,7 +169,6 @@ def extract_tree(string: str, markup_type: str) -> lxml.etree._Element:
     -------
     tree : lxml.etree._Element
         Extracted lxml.etree Element.
-
     """
     # XML
     if markup_type == "xml":
@@ -170,18 +182,22 @@ def extract_tree(string: str, markup_type: str) -> lxml.etree._Element:
         tree = html.fromstring(string.encode("utf-8"), parser=parser)
     return tree
 
-# TODO: docstring
-# TODO: accept also strings
+
+def reduce_whitespace(string: str) -> str:
+    """ Reduces all whitespace of a string to a single whitespace."""
+    return " ".join(string.split())
+
+
 def remove_tags(tree):
     """ Remove all tags of lxml tree and return string."""
     return " ".join(tree.itertext())
 
 
 # TODO docstring
-def tokenizing_html(text: str, token_list: Optional[List[str]] = []) -> List[str]:
-    """ Tokenizes a HTML document by keeping the HTML tags with angle brackets
-        and the text tokens. If a token_list is given, only tokens of the list
-        will be used, the others will be removed.
+def tokenizing_html(text: str, element_list: Optional[List[str]] = []) -> List[str]:
+    """ Tokenizes a HTML document by keeping the HTML elements with angle brackets
+        and the text tokens. If a element_list is given, only elements of the list
+        and non-HTML tokens will be used, the others will be removed.
     """
     token_pattern = r"(?u)\b\w\w+\b"
     tag_pattern = r"</{0,1}[A-Za-z][A-Za-z0-9]*\s{0,1}/{0,1}>"
@@ -189,17 +205,17 @@ def tokenizing_html(text: str, token_list: Optional[List[str]] = []) -> List[str
     tokens = regex.findall(text)
 
     # create html tags from token list
-    updated_token_list = []
+    updated_element_list = []
 
-    for token in token_list:
-        updated_token_list.append(f"<{token}>")
-        updated_token_list.append(f"<{token}/>")
-        updated_token_list.append(f"</{token}>")
-        updated_token_list.append(f"</ {token}>")
+    for token in element_list:
+        updated_element_list.append(f"<{token}>")
+        updated_element_list.append(f"<{token}/>")
+        updated_element_list.append(f"</{token}>")
+        updated_element_list.append(f"</ {token}>")
 
-    if token_list:
+    if element_list:
         return [
-            token for token in tokens if token in updated_token_list or token[0] != "<"
+            token for token in tokens if token in updated_element_list or token[0] != "<"
         ]
     else:
         return tokens
@@ -213,7 +229,7 @@ def trim_html(
     keep_tags: Optional[bool] = False,
     return_tree: Optional[bool] = False,
 ):
-    """Trim a html string file by removing all tags which are not inside the tag list.
+    """ Trim a html string file by removing all tags which are not inside the tag list.
 
     Parameters
     ----------

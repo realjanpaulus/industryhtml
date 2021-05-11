@@ -5,6 +5,7 @@ import logging
 from pathlib import Path
 import time
 
+from langdetect import detect
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -99,6 +100,10 @@ def main(args):
     if len(args.specific_country) >= 1:
         LANG = "_" + args.specific_country
 
+    CLEAN = ""
+    if args.clean_boilerplate:
+        CLEAN = "c"
+
 
     CLASS_COL = "group_representative"
     CLASS_COL_LABEL = "group_representative_label"
@@ -107,9 +112,9 @@ def main(args):
     DATA_PATH_JSON = DATA_DIR_PATH + "data.ndjson"
     INDUSTRY_CODES_PATH = DATA_DIR_PATH + "industries"
 
-    TRAIN_PATH_CSV = DATA_DIR_PATH + "train" + LANG + ROWS + ".csv"
-    TEST_PATH_CSV = DATA_DIR_PATH + "test" + LANG + ROWS + ".csv"
-    TEST_URL_TXT = args.path + "testurls" + LANG + ROWS + ".txt"
+    TRAIN_PATH_CSV = DATA_DIR_PATH + CLEAN + "train" + LANG + ROWS + ".csv"
+    TEST_PATH_CSV = DATA_DIR_PATH + CLEAN + "test" + LANG + ROWS + ".csv"
+    TEST_URL_TXT = args.path + CLEAN + "testurls" + LANG + ROWS + ".txt"
     TEST_SIZE = args.test_size
 
     ### logger ###
@@ -129,13 +134,10 @@ def main(args):
     ### add country information ###
     if not args.ignore_country:
         logging.info("Extract and appending country information.")
-        from langdetect import detect
 
-        tmp_data = data.copy()
-        tmp_data["country"] = tmp_data.apply(
+        data["country"] = data.apply(
             lambda row: detect(row.text).upper(), axis=1
         )
-        data = tmp_data.copy()
 
     ### add industry codes ###
     codes = pd.read_csv(INDUSTRY_CODES_PATH + ".csv")
@@ -167,7 +169,7 @@ def main(args):
     ### remove boilerplate html code ###
     if args.clean_boilerplate:
         logging.info("Cleaning HTML/XHTML/XML boilerplate...")
-        data["html"] = data.apply(
+        data["chtml"] = data.apply(
             lambda row: clean_boilerplate(row.html, row.url), axis=1
         )
 
