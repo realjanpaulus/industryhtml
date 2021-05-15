@@ -72,7 +72,7 @@ def parse_arguments():
         "-mr",
         type=int,
         default=None,
-        help="Sets maximum number of rows (default: None)."
+        help="Sets maximum number of rows (default: None).",
     )
     parser.add_argument(
         "--specific_country",
@@ -83,6 +83,15 @@ def parse_arguments():
     )
     parser.add_argument(
         "--test_size", "-ts", type=float, default=0.2, help="Set test size."
+    )
+    parser.add_argument(
+        "--use_test_txt",
+        "-utt",
+        action="store_true",
+        help=(
+            "Indicates if the train test split should be performed \
+            on the basis of an existing txt file."
+        ),
     )
     return parser.parse_args()
 
@@ -103,7 +112,6 @@ def main(args):
     CLEAN = ""
     if args.clean_boilerplate:
         CLEAN = "c"
-
 
     CLASS_COL = "group_representative"
     CLASS_COL_LABEL = "group_representative_label"
@@ -135,9 +143,7 @@ def main(args):
     if not args.ignore_country:
         logging.info("Extract and appending country information.")
 
-        data["country"] = data.apply(
-            lambda row: detect(row.text).upper(), axis=1
-        )
+        data["country"] = data.apply(lambda row: detect(row.text).upper(), axis=1)
 
     ### add industry codes ###
     codes = pd.read_csv(INDUSTRY_CODES_PATH + ".csv")
@@ -174,12 +180,27 @@ def main(args):
         )
 
     logging.info("Splitting data.")
-    train, test = train_test_split(
-        data,
-        test_size=TEST_SIZE,
-        stratify=data[CLASS_COL],
-        random_state=42,
-    )
+
+    ### load tests from testurl txt file ###
+    testurls_file = Path(TEST_URL_TXT)
+    if args.use_test_txt and testurls_file.is_file():
+        logging.info(f"The testurl txt-file '{TEST_URL_TXT}' will be used for train-test split.")
+        with open(testurls_file) as f:
+            testurls_str = f.read()
+            testurls = testurls_str.split(",")
+        train = data[~data["url"].isin(testurls)]
+        test = data[data["url"].isin(testurls)]
+    else:
+        if args.use_test_txt:
+            logging.info(
+                f"The testurl txt-file '{TEST_URL_TXT}' doesn't exist. A new split will be made."
+            )
+        train, test = train_test_split(
+            data,
+            test_size=TEST_SIZE,
+            stratify=data[CLASS_COL],
+            random_state=42,
+        )
 
     test_urls = ",".join(test.url.tolist())
 

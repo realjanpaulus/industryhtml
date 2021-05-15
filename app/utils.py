@@ -89,11 +89,13 @@ def clean_string(string: str):
         - carriage return '\r'
         - tab '\t'
         - duplicate whitespace
+        - special characters
     """
     string = string.replace("\n", "")
     string = string.replace("\r", "")
     string = string.replace("\t", "")
     string = reduce_whitespace(string)
+    string = remove_special_characters(string)
 
     return string
 
@@ -186,6 +188,13 @@ def extract_tree(string: str, markup_type: str) -> lxml.etree._Element:
 def reduce_whitespace(string: str) -> str:
     """ Reduces all whitespace of a string to a single whitespace."""
     return " ".join(string.split())
+
+
+def remove_special_characters(text: str, remove_digits: Optional[bool]=False):
+    """ Removes special characters. """
+    pattern = r'[^a-zA-z0-9\s]' if not remove_digits else r'[^a-zA-z\s]'
+    text = re.sub(pattern, '', text)
+    return text
 
 
 def remove_tags(tree):
