@@ -4,8 +4,6 @@ import logging
 from pathlib import Path
 import time
 
-import justext
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
@@ -17,13 +15,13 @@ from sklearn.metrics import (
     precision_score,
     recall_score,
 )
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import LabelEncoder
 from sklearn.svm import LinearSVC
 
-from stop_words import get_stop_words
 
-
+# TODO: alle arguments nützlich?
+# TODO: methode arg oder sowas einführen
 def parse_arguments():
     """ Initialize argument parser and return arguments."""
 
@@ -34,10 +32,17 @@ def parse_arguments():
         "--path", "-p", type=str, default="../data/", help="Path to dataset csv files."
     )
     parser.add_argument(
-        "--clean_html",
-        "-ch",
+        "--clean_boilerplate",
+        "-cb",
         action="store_true",
-        help="Indicates if HTML boilerplate removal should be applied.",
+        help="Indicates if HTML, XHTML or XML boilerplate removal should be applied.",
+    )
+    parser.add_argument(
+        "--max_rows",
+        "-mr",
+        type=int,
+        default=None,
+        help="Sets maximum number of rows (default: None).",
     )
     parser.add_argument(
         "--specific_country",
@@ -50,43 +55,46 @@ def parse_arguments():
         "--text_col",
         "-tc",
         type=str,
-        default="html",
+        default="text",
         help="Indicating the column with text.",
+    )
+    parser.add_argument(
+        "--testing",
+        "-t",
+        action="store_true",
+        help="Starts testing mode with a small subset of the corpus \
+						and no tunable parameters.",
     )
 
     return parser.parse_args()
 
 
-def main():
+def main(args):
+
+    # ===== #
+    # Setup #
+    # ===== #
 
     ### HYPERPARAMETERS ###
     START_TIME = time.time()
     START_DATE = f"{datetime.now():%d.%m.%y}_{datetime.now():%H:%M:%S}"
 
+
+    ROWS = ""
+    if args.max_rows:
+        ROWS = "_" + str(args.max_rows)
+
+    LANG = ""
     if len(args.specific_country) >= 1:
         LANG = "_" + args.specific_country
-    else:
-        LANG = ""
+
+    CLEAN = ""
+    if args.clean_boilerplate:
+        CLEAN = "c"
+
     DATA_DIR_PATH = args.path
-    TRAIN_PATH_CSV = DATA_DIR_PATH + "train" + LANG + ".csv"
-    TEST_PATH_CSV = DATA_DIR_PATH + "test" + LANG + ".csv"
-
-    # "text" or "html"
-    TEXT_COL = args.text_col
-
-    # "group_representative", "group_representative_label", "industry", "industry_label", "group"
-    CLASS_COL = "group_representative"
-    CLASS_NAMES = "group_representative_label"
-
-    # vectorizer settings
-    MAX_DOCUMENT_FREQUENCY = 1.0
-    MAX_FEATURES = None
-    LOWERCASE = False
-    STOP_WORDS = get_stop_words("de")
-
-    # HTML boilerplate removal
-    if TEXT_COL == "html":
-        USE_CLEAN_HTML = args.clean_html
+    TRAIN_PATH_CSV = DATA_DIR_PATH + CLEAN + "train" + LANG + ROWS + ".csv"
+    TEST_PATH_CSV = DATA_DIR_PATH + CLEAN + "test" + LANG + ROWS + ".csv"
 
     ### LOGGER ###
     Path("logs").mkdir(parents=True, exist_ok=True)
@@ -97,6 +105,50 @@ def main():
     formatter = logging.Formatter("%(levelname)s: %(message)s")
     console.setFormatter(formatter)
     logging.getLogger("").addHandler(console)
+
+    # TEXT ("text", "html", "chtml") and CLASS columns
+    TEXT_COL = args.text_col
+    CLASS_COL = "group_representative_label"
+    CLASS_NAMES = "group_representative_label"
+
+    # load dataframes
+    logging.info("Loading train and test dataframes.")
+    # TODO: welche columsn laden?
+    USECOLS = ["url", "group_representative_label", "html", "text", "meta"]
+    if args.testing:
+        train = pd.read_csv(TRAIN_PATH_CSV, nrows=100, usecols=USECOLS).fillna("")
+        test = pd.read_csv(TEST_PATH_CSV, nrows=100, usecols=USECOLS).fillna("")
+    else:
+        train = pd.read_csv(TRAIN_PATH_CSV, usecols=USECOLS).fillna("")
+        test = pd.read_csv(TEST_PATH_CSV, usecols=USECOLS).fillna("")
+
+
+    X_train = train[TEXT_COL]
+    y_train = train[CLASS_COL]
+    y_train_labels = train[CLASS_NAMES]
+
+    X_test = test[TEXT_COL]
+    y_test = test[CLASS_COL]
+    y_test_labels = test[CLASS_NAMES]
+
+    # vectorizer settings
+    MAX_DOCUMENT_FREQUENCY = 1.0
+    MAX_FEATURES = None
+    LOWERCASE = False
+    STOP_WORDS = None
+
+
+    # ======== #
+    # Training #
+    # ======== #
+
+
+    # TODO: Einstellungen
+    vectorizer = TfidfVectorizer()
+
+    pipe = Pipeline(steps=[("vect", vectorizer), ("clf", LinearSVC())])
+
+
 
     ### PROGRAM DURATION ###
     DURATION = float(time.time() - START_TIME)
