@@ -7,7 +7,13 @@ from lxml.cssselect import CSSSelector
 from lxml.html.clean import Cleaner
 from lxml import html, etree
 import numpy as np
+import pandas as pd
 
+
+
+# ================ #
+# HTML & XML utils #
+# ================ #
 
 def clean_boilerplate(
     string: str,
