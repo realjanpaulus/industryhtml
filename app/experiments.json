@@ -1,6 +1,10 @@
 {
     "0" : {
-        "name": "test",
-        "values": []
+        "name": "plain",
+        "cols": ["url", "group_representative_label", "text"]
+    },
+    "1" : {
+        "name": "meta",
+        "cols": ["url", "group_representative_label", "text", "meta"]
     }
 }
