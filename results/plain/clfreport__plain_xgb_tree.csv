@@ -1,0 +1,24 @@
+,precision,recall,f1-score,support
+Automotive,0.0,0.0,0.0,3.0
+Construction,0.0,0.0,0.0,7.0
+Consumer Goods,0.0,0.0,0.0,7.0
+Financial Services,0.0,0.0,0.0,2.0
+Human Resources,0.0,0.0,0.0,1.0
+Information Technology and Services,0.47058823529411764,0.5517241379310345,0.507936507936508,29.0
+Insurance,0.0,0.0,0.0,0.0
+Legal Services,0.0,0.0,0.0,2.0
+"Leisure, Travel & Tourism",0.0,0.0,0.0,1.0
+Logistics and Supply Chain,0.0,0.0,0.0,1.0
+Machinery,0.5,0.6666666666666666,0.5714285714285715,3.0
+Management Consulting,0.1875,0.2727272727272727,0.2222222222222222,11.0
+Marketing and Advertising,0.21428571428571427,0.5,0.3,6.0
+Mechanical or Industrial Engineering,0.5,0.16666666666666666,0.25,6.0
+Media Production,0.0,0.0,0.0,7.0
+Medical Practice,0.0,0.0,0.0,3.0
+Real Estate,0.1111111111111111,0.14285714285714285,0.125,7.0
+Renewables & Environment,0.0,0.0,0.0,0.0
+Telecommunications,0.0,0.0,0.0,2.0
+Wholesale,0.5,0.5,0.5,2.0
+accuracy,0.27,0.27,0.27,0.27
+macro avg,0.12417425303454714,0.14003209434243918,0.12382936507936508,100.0
+weighted avg,0.23273050887021476,0.27,0.24063888888888893,100.0

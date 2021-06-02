@@ -8,6 +8,7 @@ import time
 import numpy as np
 import pandas as pd
 
+from sklearn.base import TransformerMixin
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_selection import RFE
 from sklearn.linear_model import LogisticRegression
@@ -20,7 +21,7 @@ from sklearn.metrics import (
     recall_score,
 )
 from sklearn.model_selection import GridSearchCV
-from sklearn.pipeline import Pipeline
+from sklearn.pipeline import FeatureUnion, Pipeline
 from sklearn.preprocessing import LabelEncoder
 from sklearn.svm import LinearSVC
 
@@ -29,7 +30,6 @@ from xgboost import XGBClassifier
 
 ### TODO ###
 # welche columns laden?
-# TODO: preprocessing direkt in Vectorizer implementieren
 # TODO: Einstellungen
 # TODO: scoring
 #       https://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter
@@ -41,6 +41,23 @@ from xgboost import XGBClassifier
 # https://scikit-learn.org/stable/modules/generated/sklearn.inspection.permutation_importance.html
 #################################################################################
 
+
+class DataFrameColumnExtracter(TransformerMixin):
+    def __init__(self, column):
+        self.column = column
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X, y=None):
+        return X[self.column]
+
+
+class FNPipeline(Pipeline):
+    def get_feature_names(self):
+        for name, step in self.steps:
+            if isinstance(step, TfidfVectorizer):
+                return step.get_feature_names()
 
 def parse_arguments():
     """ Initialize argument parser and return arguments."""
@@ -108,7 +125,6 @@ def parse_arguments():
 
     return parser.parse_args()
 
-
 def main(args):
 
     # ===== #
@@ -142,7 +158,7 @@ def main(args):
 
     ROWS = ""
     if args.data_shortened:
-        ROWS = "_" + str(args.max_rows)
+        ROWS = "_" + str(args.data_shortened)
 
     ### Global variables ###
     DATA_DIR_PATH = args.path
@@ -180,24 +196,11 @@ def main(args):
         test = pd.read_csv(TEST_PATH_CSV, usecols=USECOLS).fillna("")
     logging.info(f"Loading took {int(float(time.time() - START_TIME))/60} minute(s).")
 
-    # ================ #
-    # Experiment setup #
-    # ================ #
-
-    if EXPERIMENT_N == 0:
-        logging.info("Experiment: Plain text.")
-        train_text = train[TEXT_COL]
-        test_text = test[TEXT_COL]
-    elif EXPERIMENT_N == 1:
-        logging.info("Experiment: Meta element addition.")
-        train_text = train[TEXT_COL] + train["meta"]
-        test_text = test[TEXT_COL]
-
-    X_train = train_text
+    X_train = train
     y_train = train[CLASS_COL]
     y_train_labels = train[CLASS_NAMES]
 
-    X_test = test_text
+    X_test = test
     y_test = test[CLASS_COL]
     y_test_labels = test[CLASS_NAMES]
 
@@ -212,11 +215,7 @@ def main(args):
         ("xgb_linear", XGBClassifier(booster="gblinear", n_jobs=N_JOBS)),
     ]
 
-
     if TESTING:
-        models = [
-            ("svm", LinearSVC()),
-        ]
         models = [
             ("logreg", LogisticRegression(n_jobs=N_JOBS)),
             ("svm", LinearSVC()),
@@ -224,7 +223,9 @@ def main(args):
             ("xgb_linear", XGBClassifier(booster="gblinear", n_jobs=N_JOBS)),
         ]
 
-    ### Model loop ###
+    # ========== #
+    # Model loop #
+    # ========== #
     for model_name, model_obj in models:
 
         if model_name.startswith("xgb"):
@@ -233,29 +234,57 @@ def main(args):
 
         OUTPUT_NAME = f"_{EXPERIMENT['name']}_{model_name}"
 
-        pipe = Pipeline(steps=[("vect", TfidfVectorizer()), (model_name, model_obj)])
+        ### Experiment setup ###
+        if EXPERIMENT_N == 0:
+            logging.info("Experiment: Plain text.")
+            pipe = Pipeline([
+                ("features", FeatureUnion([
+                    ("plain", FNPipeline([
+                        ("extract_text", DataFrameColumnExtracter("text")),
+                        ("plain_vect", TfidfVectorizer()),
+                    ]))
+                ])),
+                (model_name, model_obj),
+            ])
+        elif EXPERIMENT_N == 1:
+            logging.info("Experiment: Meta element addition.")
+            pipe = Pipeline([
+                ("features", FeatureUnion([
+                    ("plain", Pipeline([
+                        ("extract_text", DataFrameColumnExtracter("text")),
+                        ("plain_vect", TfidfVectorizer()),
+                    ])),
+                    ("meta", Pipeline([
+                        ("extract_meta", DataFrameColumnExtracter("meta")),
+                        ("meta_vect", TfidfVectorizer()),
+                    ]))
+                ], n_jobs=N_JOBS)),
+                (model_name, model_obj),
+            ])
 
+
+        ### Hyperparamter optimization ###
         if TESTING:
             parameters = {
-                "vect__lowercase": [True],
-                "vect__preprocessor": [None],
-                "vect__stop_words": [None],
-                "vect__max_df": [1.0],
-                "vect__min_df": [1],
-                "vect__max_features": [None],
-                "vect__norm": ["l2"],
-                "vect__sublinear_tf": [True],
+                "features__plain__plain_vect__lowercase": [True],
+                "features__plain__plain_vect__preprocessor": [None],
+                "features__plain__plain_vect__stop_words": [None],
+                "features__plain__plain_vect__max_df": [1.0],
+                "features__plain__plain_vect__min_df": [1],
+                "features__plain__plain_vect__max_features": [None],
+                "features__plain__plain_vect__norm": ["l2"],
+                "features__plain__plain_vect__sublinear_tf": [True],
             }
         else:
             parameters = {
-                "vect__lowercase": [True],
-                "vect__preprocessor": [None],
-                "vect__stop_words": [None],
-                "vect__max_df": [0.25, 0.5, 0.75, 1.0],
-                "vect__min_df": [1],
-                "vect__max_features": [100, 1000, 10000, None],
-                "vect__norm": ["l1", "l2"],
-                "vect__sublinear_tf": [True],
+                "features__plain__plain_vect__lowercase": [True],
+                "features__plain__plain_vect__preprocessor": [None],
+                "features__plain__plain_vect__stop_words": [None],
+                "features__plain__plain_vect__max_df": [0.25, 0.5, 0.75, 1.0],
+                "features__plain__plain_vect__min_df": [1],
+                "features__plain__plain_vect__max_features": [100, 1000, 10000, None],
+                "features__plain__plain_vect__norm": ["l1", "l2"],
+                "features__plain__plain_vect__sublinear_tf": [True],
             }
 
 
@@ -280,9 +309,9 @@ def main(args):
             json.dump(best_params, f)
 
 
+        ### Prediction & Classification report ###
         y_pred = grid.predict(X_test)
 
-        ### Classification report ###
         clf_report = classification_report(
             y_test,
             y_pred,
@@ -300,7 +329,9 @@ def main(args):
         cm_df.to_csv(f"{RESULTS_PATH}/cm_{OUTPUT_NAME}.csv")
 
         ### Feature importance ###
-        feature_names = grid.best_estimator_.named_steps["vect"].get_feature_names()
+        tmp = dict(grid.best_estimator_.named_steps['features'].transformer_list).get("plain")
+        feature_names = tmp.get_feature_names()
+
         if model_name == "xgb_tree":
             features_d = dict(
                 zip(
