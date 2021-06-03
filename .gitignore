@@ -142,4 +142,4 @@ data/*train*.csv
 data/*test*.csv
 data/*train*.ndjson
 data/*test*.ndjson
-results/**
+/results/**
