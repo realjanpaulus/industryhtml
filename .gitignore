@@ -134,6 +134,7 @@ old/
 app/logs/
 app/old/
 data/old
+*.zip
 data/*.7z
 data/*.rar
 data/clean-websites.7z
@@ -142,4 +143,4 @@ data/*train*.csv
 data/*test*.csv
 data/*train*.ndjson
 data/*test*.ndjson
-coefs__**
+testresults/

@@ -141,26 +141,39 @@ def detect_XML(string: str) -> str:
         return "html"
 
 
-def extract_meta_informations(string: str, markup_type: str) -> list:
-    """ Extracts meta information from 'description'- and 'keyword'-
-        meta elements and returns the content in a list.
+def extract_meta_informations(string: str, meta_type: str) -> list:
+    """ Extracts meta information from 'title'-, 'keyword'- and description'- 
+        meta elements (by choice) and returns the content in a list.
     """
     # title already in text
-    tags = ['meta[property="og:description"]',
-            'meta[name="description"]',
-            'meta[property="og:keyword"]',
-            'meta[name="keyword"]']
+    if meta_type == "title":
+        tags = ['meta[property="og:title"]', 'meta[name="title"]']
+    elif meta_type == "keywords":
+        tags = ['meta[property="og:keyword"]', 'meta[name="keyword"]']
+    elif meta_type == "description":
+        tags = ['meta[property="og:description"]', 'meta[name="description"]']
+    
+    else:
+        tags = ['meta[property="og:description"]',
+                'meta[name="description"]',
+                'meta[property="og:keyword"]',
+                'meta[name="keyword"]', 
+                'meta[property="og:title"]', 
+                'meta[name="title"]']
 
     tags = ", ".join(tags)
 
-    try:
-        tree = extract_tree(string, markup_type)
-        select = CSSSelector(tags, translator=markup_type)
-        results = [element.get('content') for element in select(tree)]
-        results = [x for x in results if x is not None]
-        return list(set(results))
+    
+    try:      
+        tree = extract_tree(string, "html")
+        select = CSSSelector(tags, translator="html")
     except:
-        return [""]
+        tree = extract_tree(string, "xml")
+        select = CSSSelector(tags, translator="xml")
+        
+    results = [element.get('content') for element in select(tree)]
+    results = [x for x in results if x is not None]
+    return " ".join(list(set(results)))
 
 
 def extract_tree(string: str, markup_type: str) -> lxml.etree._Element:

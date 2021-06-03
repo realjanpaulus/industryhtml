@@ -10,8 +10,6 @@ import pandas as pd
 
 from sklearn.base import TransformerMixin
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.feature_selection import RFE
-from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
     confusion_matrix,
     classification_report,
@@ -55,7 +53,7 @@ class DataFrameColumnExtracter(TransformerMixin):
 
 class FNPipeline(Pipeline):
     def get_feature_names(self):
-        for name, step in self.steps:
+        for _, step in self.steps:
             if isinstance(step, TfidfVectorizer):
                 return step.get_feature_names()
 
@@ -143,8 +141,11 @@ def main(args):
     USECOLS = EXPERIMENT["cols"]
     TESTING = args.testing
 
-    Path("../results").mkdir(parents=True, exist_ok=True)
-    RESULTS_PATH = f"../results/{EXPERIMENT['name']}"
+    results_dir = "results"
+    if TESTING:
+        results_dir = "testresults"
+    Path(f"../{results_dir}").mkdir(parents=True, exist_ok=True)
+    RESULTS_PATH = f"../{results_dir}/{EXPERIMENT['name']}"
     Path(f"{RESULTS_PATH}").mkdir(parents=True, exist_ok=True)
 
     ### Data variant selection ###
@@ -156,14 +157,14 @@ def main(args):
     if len(args.specific_country) >= 1:
         LANG = "_" + args.specific_country
 
-    ROWS = ""
+    NROWS = None
     if args.data_shortened:
-        ROWS = "_" + str(args.data_shortened)
+        NROWS = args.data_shortened
 
     ### Global variables ###
     DATA_DIR_PATH = args.path
-    TRAIN_PATH_CSV = DATA_DIR_PATH + CLEAN + "train" + LANG + ROWS + ".csv"
-    TEST_PATH_CSV = DATA_DIR_PATH + CLEAN + "test" + LANG + ROWS + ".csv"
+    TRAIN_PATH_CSV = DATA_DIR_PATH + CLEAN + "train" + LANG + ".csv"
+    TEST_PATH_CSV = DATA_DIR_PATH + CLEAN + "test" + LANG + ".csv"
 
     TEXT_COL = args.text_col
     CLASS_COL = "group_representative_label"
@@ -189,11 +190,11 @@ def main(args):
     ### Load dataframes ###
     logging.info(f"Loading train and test dataframes.")
     if TESTING:
-        train = pd.read_csv(TRAIN_PATH_CSV, nrows=100, usecols=USECOLS).fillna("")
-        test = pd.read_csv(TEST_PATH_CSV, nrows=100, usecols=USECOLS).fillna("")
+        train = pd.read_csv(TRAIN_PATH_CSV, nrows=100, usecols=USECOLS, lineterminator='\n').fillna("")
+        test = pd.read_csv(TEST_PATH_CSV, nrows=100, usecols=USECOLS, lineterminator='\n').fillna("")
     else:
-        train = pd.read_csv(TRAIN_PATH_CSV, usecols=USECOLS).fillna("")
-        test = pd.read_csv(TEST_PATH_CSV, usecols=USECOLS).fillna("")
+        train = pd.read_csv(TRAIN_PATH_CSV, nrows=NROWS, usecols=USECOLS, lineterminator='\n').fillna("")
+        test = pd.read_csv(TEST_PATH_CSV, nrows=NROWS, usecols=USECOLS, lineterminator='\n').fillna("")
     logging.info(f"Loading took {int(float(time.time() - START_TIME))/60} minute(s).")
 
     X_train = train
@@ -204,12 +205,12 @@ def main(args):
     y_test = test[CLASS_COL]
     y_test_labels = test[CLASS_NAMES]
 
+
     # ======== #
     # Training #
     # ======== #
 
     models = [
-        ("logreg", LogisticRegression(n_jobs=N_JOBS)),
         ("svm", LinearSVC()),
         ("xgb_tree", XGBClassifier(booster="gbtree", n_jobs=N_JOBS)),
         ("xgb_linear", XGBClassifier(booster="gblinear", n_jobs=N_JOBS)),
@@ -217,7 +218,6 @@ def main(args):
 
     if TESTING:
         models = [
-            ("logreg", LogisticRegression(n_jobs=N_JOBS)),
             ("svm", LinearSVC()),
             ("xgb_tree", XGBClassifier(booster="gbtree", n_jobs=N_JOBS)),
             ("xgb_linear", XGBClassifier(booster="gblinear", n_jobs=N_JOBS)),
@@ -240,7 +240,7 @@ def main(args):
             pipe = Pipeline([
                 ("features", FeatureUnion([
                     ("plain", FNPipeline([
-                        ("extract_text", DataFrameColumnExtracter("text")),
+                        ("extract_text", DataFrameColumnExtracter(TEXT_COL)),
                         ("plain_vect", TfidfVectorizer()),
                     ]))
                 ])),
@@ -251,7 +251,7 @@ def main(args):
             pipe = Pipeline([
                 ("features", FeatureUnion([
                     ("plain", Pipeline([
-                        ("extract_text", DataFrameColumnExtracter("text")),
+                        ("extract_text", DataFrameColumnExtracter(TEXT_COL)),
                         ("plain_vect", TfidfVectorizer()),
                     ])),
                     ("meta", Pipeline([
@@ -282,10 +282,11 @@ def main(args):
                 "features__plain__plain_vect__stop_words": [None],
                 "features__plain__plain_vect__max_df": [0.25, 0.5, 0.75, 1.0],
                 "features__plain__plain_vect__min_df": [1],
-                "features__plain__plain_vect__max_features": [100, 1000, 10000, None],
-                "features__plain__plain_vect__norm": ["l1", "l2"],
+                "features__plain__plain_vect__max_features": [100, None],
+                "features__plain__plain_vect__norm": ["l2"],
                 "features__plain__plain_vect__sublinear_tf": [True],
             }
+            
 
 
         logging.info(f"Begin training of {model_name}.")
@@ -299,7 +300,7 @@ def main(args):
             n_jobs=N_JOBS,
             refit="precision",
             scoring=SCORING,
-            verbose=0,
+            verbose=1,
         )
         grid.fit(X_train, y_train)
 
@@ -322,9 +323,9 @@ def main(args):
         clf_report_df.to_csv(f"{RESULTS_PATH}/clfreport_{OUTPUT_NAME}.csv")
 
         ### Confusion matrix handling ###
-        cm = confusion_matrix(y_train, y_pred)
+        cm = confusion_matrix(y_test, y_pred)
         cm_df = pd.DataFrame(
-            cm, index=np.unique(y_train_labels), columns=np.unique(y_train_labels)
+            cm, index=np.unique(y_test_labels), columns=np.unique(y_train_labels)
         )
         cm_df.to_csv(f"{RESULTS_PATH}/cm_{OUTPUT_NAME}.csv")
 
@@ -349,7 +350,7 @@ def main(args):
                 columns=feature_names,
             )
             coefs_df.index.name = "class"
-            coefs_df.to_csv(f"{RESULTS_PATH}/coefs_{OUTPUT_NAME}.csv")
+            coefs_df.to_csv(f"{RESULTS_PATH}/coefs_{OUTPUT_NAME}.csv.zip")
 
 
     ### PROGRAM DURATION ###

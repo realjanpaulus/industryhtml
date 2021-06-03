@@ -1,19 +1,22 @@
-,Automotive,Construction,Consumer Goods,Financial Services,Information Technology and Services,Insurance,"Leisure, Travel & Tourism",Logistics and Supply Chain,Machinery,Management Consulting,Marketing and Advertising,Mechanical or Industrial Engineering,Media Production,Medical Practice,Real Estate,Renewables & Environment,Telecommunications,Wholesale
-Automotive,0,0,1,0,6,0,1,0,0,0,1,0,0,1,0,0,0,0
-Construction,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0
-Consumer Goods,0,0,1,0,6,0,0,0,0,0,0,0,1,0,0,0,0,0
-Financial Services,1,0,1,1,2,0,0,0,0,0,0,0,1,0,0,0,0,0
-Information Technology and Services,0,0,1,1,17,0,0,0,0,0,2,0,3,1,0,0,0,0
-Insurance,0,0,0,0,2,0,0,0,0,0,1,0,0,0,0,0,0,0
-"Leisure, Travel & Tourism",1,0,0,0,1,0,1,0,0,1,0,0,0,0,0,0,0,0
-Logistics and Supply Chain,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0
-Machinery,0,0,1,0,3,0,0,0,0,0,0,0,1,0,0,0,0,0
-Management Consulting,0,0,1,0,2,0,0,0,0,0,0,1,0,0,0,0,0,0
-Marketing and Advertising,0,0,0,1,5,0,1,0,0,0,0,0,0,0,0,0,0,1
-Mechanical or Industrial Engineering,0,0,0,0,2,0,0,0,0,0,1,0,0,0,0,0,0,0
-Media Production,0,0,0,0,4,0,0,0,0,0,1,0,0,0,0,0,0,0
-Medical Practice,0,0,0,0,3,0,0,0,0,0,1,0,1,0,0,0,0,0
-Real Estate,0,0,0,0,2,0,0,0,0,0,1,0,1,0,0,0,0,0
-Renewables & Environment,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0
-Telecommunications,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0
-Wholesale,0,0,0,0,1,0,0,0,0,0,2,0,0,0,0,0,0,0
+,Automotive,Construction,Consumer Goods,Financial Services,Human Resources,Information Technology and Services,Insurance,Legal Services,"Leisure, Travel & Tourism",Logistics and Supply Chain,Machinery,Management Consulting,Marketing and Advertising,Mechanical or Industrial Engineering,Media Production,Medical Practice,Real Estate,Recreational Facilities and Services,Renewables & Environment,Telecommunications,Wholesale
+Automotive,0,0,0,0,0,317,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+Construction,0,0,0,0,0,386,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+Consumer Goods,0,0,0,0,0,506,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+Financial Services,0,0,0,0,0,412,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+Human Resources,0,0,0,0,0,193,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+Information Technology and Services,0,0,0,0,0,1505,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+Insurance,0,0,0,0,0,125,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+Legal Services,0,0,0,0,0,128,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+"Leisure, Travel & Tourism",0,0,0,0,0,122,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+Logistics and Supply Chain,0,0,0,0,0,147,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+Machinery,0,0,0,0,0,505,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+Management Consulting,0,0,0,0,0,667,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+Marketing and Advertising,0,0,0,0,0,522,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+Mechanical or Industrial Engineering,0,0,0,0,0,577,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+Media Production,0,0,0,0,0,241,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+Medical Practice,0,0,0,0,0,356,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+Real Estate,0,0,0,0,0,236,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+Recreational Facilities and Services,0,0,0,0,0,156,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+Renewables & Environment,0,0,0,0,0,103,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+Telecommunications,0,0,0,0,0,137,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+Wholesale,0,0,0,0,0,232,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0

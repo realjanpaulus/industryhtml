@@ -138,11 +138,12 @@ def main(args):
     logging.info("Loading ndjson.")
     data_records = map(json.loads, open(DATA_PATH_JSON))
     data = pd.DataFrame.from_records(data_records, nrows=args.max_rows)
+    data = data.drop_duplicates()
+    data
 
     ### add country information ###
     if not args.ignore_country:
         logging.info("Extract and appending country information.")
-
         data["country"] = data.apply(lambda row: detect(row.text).upper(), axis=1)
 
     ### add industry codes ###
@@ -167,10 +168,20 @@ def main(args):
 
     ### extract meta tags ###
     logging.info("Extract informations from <meta> tags.")
-    data["meta"] = data.apply(
-        lambda row: " ".join(extract_meta_informations(row.html, detect_XML(row.html))),
+    data["meta_title"] = data.apply(
+        lambda row: extract_meta_informations(row.html, "title"),
         axis=1,
     )
+    data["meta_keywords"] = data.apply(
+        lambda row: extract_meta_informations(row.html, "keywords"),
+        axis=1,
+    )
+    data["meta_description"] = data.apply(
+        lambda row: extract_meta_informations(row.html, "description"),
+        axis=1,
+    )
+    ### remove meta title from text ###
+    data["text"] = data.apply(lambda row: row.text.replace(row.meta_title, ""), axis=1,)
 
     ### remove boilerplate html code ###
     if args.clean_boilerplate:
@@ -179,12 +190,42 @@ def main(args):
             lambda row: clean_boilerplate(row.html, row.url), axis=1
         )
 
+    ### remove useless columns ###
+    possible_columns = [
+        "level_0",
+        "index",
+        "industry",
+        "industry_label",
+        "group",
+        "source",
+    ]
+    for col in possible_columns:
+        if col in data:
+            data = data.drop([col], axis=1)
+
+    columns = [
+        "url",
+        "group_representative",
+        "group_representative_label",
+        "text",
+        "html",
+        "chtml",
+        "meta_title",
+        "meta_keywords",
+        "meta_description",
+    ]
+    if not args.ignore_country:
+        columns.append("country")
+    data = data.reindex(columns=columns)
+
     logging.info("Splitting data.")
 
     ### load tests from testurl txt file ###
     testurls_file = Path(TEST_URL_TXT)
     if args.use_test_txt and testurls_file.is_file():
-        logging.info(f"The testurl txt-file '{TEST_URL_TXT}' will be used for train-test split.")
+        logging.info(
+            f"The testurl txt-file '{TEST_URL_TXT}' will be used for train-test split."
+        )
         with open(testurls_file) as f:
             testurls_str = f.read()
             testurls = testurls_str.split(",")
@@ -203,6 +244,12 @@ def main(args):
         )
 
     test_urls = ",".join(test.url.tolist())
+
+    ### remove duplicates ###
+    # TODO!!
+    # logging.info("Remove duplicates.")
+    # train = train.drop_duplicates().reset_index()
+    # test = test.drop_duplicates().reset_index()
 
     ### save to csv ###
     logging.info("Saving data.")
