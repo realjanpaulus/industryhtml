@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-from utils import clean_boilerplate, detect_XML, extract_meta_informations
+from utils import clean_boilerplate, extract_meta_informations, extract_tagtexts
 
 
 def get_code(code_list, identifier):
@@ -68,6 +68,12 @@ def parse_arguments():
         help="Ignore addition of ISO2 country code to shorten the runtime.",
     )
     parser.add_argument(
+        "--keep_html_col",
+        "-khc",
+        action="store_true",
+        help="Keep the original html column."
+    )
+    parser.add_argument(
         "--max_rows",
         "-mr",
         type=int,
@@ -112,6 +118,8 @@ def main(args):
     CLEAN = ""
     if args.clean_boilerplate:
         CLEAN = "c"
+
+    KEEP_HTML_COL = args.keep_html_col
 
     CLASS_COL = "group_representative"
     CLASS_COL_LABEL = "group_representative_label"
@@ -166,31 +174,54 @@ def main(args):
                 all countries will be kept!"
             )
 
-    ### extract meta tags ###
-    logging.info("Extract informations from <meta> tags.")
-    data["meta_title"] = data.apply(
+    ### remove boilerplate html code ###
+    HTML_COL = "html"
+    if args.clean_boilerplate:
+        logging.info("Cleaning HTML/XHTML/XML boilerplate...")
+        HTML_COL = "chtml"
+        data[HTML_COL] = data.apply(
+            lambda row: clean_boilerplate(row.html, row.url), axis=1
+        )
+
+
+    # ============================== #
+    # Add element content as columns #
+    # ============================== #
+
+    ### extract meta element ###
+    logging.info("Extract informations from <meta> elements.")
+    data["<meta>_title"] = data.apply(
         lambda row: extract_meta_informations(row.html, "title"),
         axis=1,
     )
-    data["meta_keywords"] = data.apply(
+    data["<meta>_keywords"] = data.apply(
         lambda row: extract_meta_informations(row.html, "keywords"),
         axis=1,
     )
-    data["meta_description"] = data.apply(
+    data["<meta>_description"] = data.apply(
         lambda row: extract_meta_informations(row.html, "description"),
         axis=1,
     )
     ### remove meta title from text ###
-    data["text"] = data.apply(lambda row: row.text.replace(row.meta_title, ""), axis=1,)
+    data["text"] = data.apply(lambda row: row.text.replace(row["<meta>_title"], ""), axis=1,)
 
-    ### 
+    ### extract more element content ###
+    logging.info("Extract infos from other elements.")
+    data["<title>"] = data.apply(lambda row: extract_tagtexts(row[HTML_COL], "title"), axis=1)
+    data["<h1>"] = data.apply(lambda row: extract_tagtexts(row[HTML_COL], "h1"), axis=1)
+    data["<h2>"] = data.apply(lambda row: extract_tagtexts(row[HTML_COL], "h2"), axis=1)
+    data["<h3>"] = data.apply(lambda row: extract_tagtexts(row[HTML_COL], "h3"), axis=1)
+    data["<h4>"] = data.apply(lambda row: extract_tagtexts(row[HTML_COL], "h4"), axis=1)
+    data["<h5>"] = data.apply(lambda row: extract_tagtexts(row[HTML_COL], "h5"), axis=1)
+    data["<h6>"] = data.apply(lambda row: extract_tagtexts(row[HTML_COL], "h6"), axis=1)
+    data["<b>"] = data.apply(lambda row: extract_tagtexts(row[HTML_COL], "b"), axis=1)
+    data["<strong>"] = data.apply(lambda row: extract_tagtexts(row[HTML_COL], "strong"), axis=1)
+    data["<em>"] = data.apply(lambda row: extract_tagtexts(row[HTML_COL], "em"), axis=1)
+    data["<i>"] = data.apply(lambda row: extract_tagtexts(row[HTML_COL], "i"), axis=1)
+    data["<p>"] = data.apply(lambda row: extract_tagtexts(row[HTML_COL], "p"), axis=1)
+    data["<a>"] = data.apply(lambda row: extract_tagtexts(row[HTML_COL], "a"), axis=1)
+    data["<li>"] = data.apply(lambda row: extract_tagtexts(row[HTML_COL], "li"), axis=1)
 
-    ### remove boilerplate html code ###
-    if args.clean_boilerplate:
-        logging.info("Cleaning HTML/XHTML/XML boilerplate...")
-        data["chtml"] = data.apply(
-            lambda row: clean_boilerplate(row.html, row.url), axis=1
-        )
 
     ### remove useless columns ###
     possible_columns = [
@@ -201,6 +232,9 @@ def main(args):
         "group",
         "source",
     ]
+    if not KEEP_HTML_COL:
+        possible_columns.append("html")
+
     for col in possible_columns:
         if col in data:
             data = data.drop([col], axis=1)
@@ -210,14 +244,29 @@ def main(args):
         "group_representative",
         "group_representative_label",
         "text",
-        "html",
-        "chtml",
-        "meta_title",
-        "meta_keywords",
-        "meta_description",
+        HTML_COL,
+        "<meta>_title",
+        "<meta>_keywords",
+        "<meta>_description",
+        "<h1>", 
+        "<h2>",
+        "<h3>",
+        "<h4>",
+        "<h5>",
+        "<b>",
+        "<strong>",
+        "<em>",
+        "<i>",
+        "<p>",
+        "<a>",
+        "<li>"
     ]
     if not args.ignore_country:
         columns.append("country")
+
+    if KEEP_HTML_COL:
+        columns.append("html")
+    
     data = data.reindex(columns=columns)
 
     logging.info("Splitting data.")

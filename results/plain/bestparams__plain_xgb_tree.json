@@ -1,1 +1,0 @@
-{"features__plain__plain_vect__lowercase": true, "features__plain__plain_vect__max_df": 1.0, "features__plain__plain_vect__max_features": null, "features__plain__plain_vect__min_df": 1, "features__plain__plain_vect__norm": "l2", "features__plain__plain_vect__preprocessor": null, "features__plain__plain_vect__stop_words": null, "features__plain__plain_vect__sublinear_tf": true}

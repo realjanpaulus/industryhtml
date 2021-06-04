@@ -175,9 +175,8 @@ def extract_meta_informations(string: str, meta_type: str) -> list:
     results = [x for x in results if x is not None]
     return " ".join(list(set(results)))
 
-
 def extract_tagtexts(string: str, tag: str):
-    """ Extract text content from all elements 'tag'."""
+    """ Extract text content from all elements inside given tag."""
     try:      
         tree = extract_tree(string, "html")
         select = CSSSelector(tag, translator="html")
@@ -232,81 +231,3 @@ def remove_special_characters(text: str, remove_digits: Optional[bool]=False):
 def remove_tags(tree):
     """ Remove all tags of lxml tree and return string."""
     return " ".join(tree.itertext())
-
-
-# TODO docstring
-def tokenizing_html(text: str, element_list: Optional[List[str]] = []) -> List[str]:
-    """ Tokenizes a HTML document by keeping the HTML elements with angle brackets
-        and the text tokens. If a element_list is given, only elements of the list
-        and non-HTML tokens will be used, the others will be removed.
-    """
-    token_pattern = r"(?u)\b\w\w+\b"
-    tag_pattern = r"</{0,1}[A-Za-z][A-Za-z0-9]*\s{0,1}/{0,1}>"
-    regex = re.compile(token_pattern + "|" + tag_pattern)
-    tokens = regex.findall(text)
-
-    # create html tags from token list
-    updated_element_list = []
-
-    for token in element_list:
-        updated_element_list.append(f"<{token}>")
-        updated_element_list.append(f"<{token}/>")
-        updated_element_list.append(f"</{token}>")
-        updated_element_list.append(f"</ {token}>")
-
-    if element_list:
-        return [
-            token for token in tokens if token in updated_element_list or token[0] != "<"
-        ]
-    else:
-        return tokens
-
-
-# TODO: allow xml. ICH: ?
-def trim_html(
-    html_string: str,
-    clean_html: Optional[bool] = True,
-    element_list: Optional[list] = None,
-    keep_tags: Optional[bool] = False,
-    return_tree: Optional[bool] = False,
-):
-    """ Trim a html string file by removing all tags which are not inside the tag list.
-
-    Parameters
-    ----------
-    html_string : str
-        String which contains the HTML.
-    clean_html : bool, default=True
-        Indicates if the html string should be cleaned. Could prevent errors.
-    element_list : list, default=None
-        List with elements which should be kept.
-    keep_tags : bool, default=False
-        Indicates if tags should be removed or kept.
-    return_tree : bool, default=False
-        Indicates if lxml tree object or a string should be returned.
-
-    Returns
-    -------
-    lxml.html.HtmlElement/string
-        Returns trimmed tree or string.
-
-    """
-
-    if element_list is None:
-        element_list = []
-
-    if clean_html:
-        html_string = clean_boilerplate(html_string, "")
-    tree = html.fromstring(html_string)
-    unique_tags = list(np.unique([element.tag for element in tree.iter()]))
-    unique_tags = [element for element in unique_tags if element not in element_list]
-
-    etree.strip_tags(tree, unique_tags)
-
-    if return_tree:
-        return tree
-    else:
-        if keep_tags:
-            return etree.tostring(tree, encoding="unicode", method="html")
-        else:
-            return remove_tags(tree)

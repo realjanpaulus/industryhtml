@@ -1,17 +1,107 @@
 {
     "0" : {
         "name": "plain",
-        "cols": ["url", "group_representative_label", "text"],
+        "cols": [
+            "url", 
+            "group_representative_label", 
+            "text"
+        ],
         "info": "The plain text, no other tags."
     },
     "1" : {
         "name": "meta",
-        "cols": ["url", "group_representative_label", "text", "meta_title", "meta_keywords", "meta_description"],
+        "cols": [
+            "url", 
+            "group_representative_label", 
+            "text", 
+            "<meta>_title", 
+            "<meta>_keywords", 
+            "<meta>_description"
+        ],
         "info": "Plain text + meta informations (title, description and keywords)."
     },
+    "101" : {
+        "name": "meta_only_elements",
+        "cols": [
+            "url", 
+            "group_representative_label", 
+            "text",
+            "<meta>_title", 
+            "<meta>_keywords", 
+            "<meta>_description"
+        ],
+        "info": "Meta informations (title, description and keywords)."
+    },
     "2" : {
-        "name": "golub_ardo_2005",
-        "cols": ["url", "group_representative_label", "text"],
-        "info": "TODO"
+        "name": "golub_2005",
+        "cols": [
+            "url", 
+            "group_representative_label", 
+            "text",
+            "<title>",
+            "<h1>",
+            "<h2>",
+            "<h3>",
+            "<h4>",
+            "<h5>",
+            "<h6>"
+        ],
+        "info": "Plain text + title + headings + meta informations (title, description and keywords) (see GOLUB, ARDO, 'Importance of HTML Structural Elements and Metadata in Automated Subject Classification')"
+    },
+    "201" : {
+        "name": "golub_2005_only_elements",
+        "cols": [
+            "url", 
+            "group_representative_label", 
+            "text",
+            "<title>",
+            "<h1>",
+            "<h2>",
+            "<h3>",
+            "<h4>",
+            "<h5>",
+            "<h6>"
+        ],
+        "info": "Title + headings + meta informations (title, description and keywords) (see GOLUB, ARDO, 'Importance of HTML Structural Elements and Metadata in Automated Subject Classification')"
+    },
+    "3" : {
+        "name": "özel_2011",
+        "cols": [
+            "url", 
+            "group_representative_label", 
+            "text",
+            "<title>",
+            "<h1>",
+            "<h2>",
+            "<h3>",
+            "<b>",
+            "<strong>",
+            "<em>",
+            "<i>",
+            "<p>",
+            "<a>",
+            "<li>"
+        ],
+        "info": "Plain text + title + h1-h3 + b + strong + em + i + p + a + li (see ÖZEL, 'A web page classification system based on a genetic algorithm using tagged-terms as features')"
+    },
+    "301" : {
+        "name": "özel_2011_only_elements",
+        "cols": [
+            "url", 
+            "group_representative_label", 
+            "text",
+            "<title>",
+            "<h1>",
+            "<h2>",
+            "<h3>",
+            "<b>",
+            "<strong>",
+            "<em>",
+            "<i>",
+            "<p>",
+            "<a>",
+            "<li>"
+        ],
+        "info": "Plain text + title + h1-h3 + b + strong + em + i + p + a + li (see ÖZEL, 'A web page classification system based on a genetic algorithm using tagged-terms as features')"
     }
 }
