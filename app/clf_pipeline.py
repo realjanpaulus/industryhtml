@@ -4,6 +4,8 @@ import json
 import logging
 from pathlib import Path
 import time
+import warnings
+warnings.filterwarnings("ignore")
 
 import numpy as np
 import pandas as pd
@@ -17,8 +19,9 @@ from sklearn.metrics import (
     make_scorer,
     precision_score,
     recall_score,
+    roc_auc_score,
 )
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 from sklearn.pipeline import FeatureUnion, Pipeline
 from sklearn.preprocessing import LabelEncoder
 from sklearn.svm import LinearSVC
@@ -56,6 +59,7 @@ class FNPipeline(Pipeline):
         for _, step in self.steps:
             if isinstance(step, TfidfVectorizer):
                 return step.get_feature_names()
+
 
 def parse_arguments():
     """ Initialize argument parser and return arguments."""
@@ -100,6 +104,12 @@ def parse_arguments():
         help="Indicates the number of processors used for computation (default: 1).",
     )
     parser.add_argument(
+        "--optimization",
+        "-o",
+        action="store_true",
+        help="Indicates if hyperparameter optimization should be used.",
+    )
+    parser.add_argument(
         "--specific_country",
         "-sc",
         type=str,
@@ -123,6 +133,7 @@ def parse_arguments():
 
     return parser.parse_args()
 
+
 def main(args):
 
     # ===== #
@@ -131,7 +142,7 @@ def main(args):
 
     ### Time management ###
     START_TIME = time.time()
-    START_DATE = f"{datetime.now():%d.%m.%y}_{datetime.now():%H:%M:%S}"
+    START_DATE = f"{datetime.now():%d.%m.%y}_{datetime.now():%H:%M:%S}"       
 
     with open("experiments.json") as f:
         experiments = json.load(f)
@@ -170,11 +181,13 @@ def main(args):
     CLASS_COL = "group_representative_label"
     CLASS_NAMES = "group_representative_label"
 
-    N_JOBS = args.n_jobs
     CV = args.cross_validation
+    N_JOBS = args.n_jobs
+    OPTIMIZATION = args.optimization
     SCORING = {
-        "f1": make_scorer(f1_score, average="macro", zero_division=0),
+        "f1": make_scorer(f1_score, average="weighted", zero_division=0),
         "precision": make_scorer(precision_score, average="macro", zero_division=0),
+        "recall": make_scorer(recall_score, average="macro", zero_division=0),
     }
 
     ### LOGGER ###
@@ -190,11 +203,19 @@ def main(args):
     ### Load dataframes ###
     logging.info(f"Loading train and test dataframes.")
     if TESTING:
-        train = pd.read_csv(TRAIN_PATH_CSV, nrows=100, usecols=USECOLS, lineterminator='\n').fillna("")
-        test = pd.read_csv(TEST_PATH_CSV, nrows=100, usecols=USECOLS, lineterminator='\n').fillna("")
+        train = pd.read_csv(
+            TRAIN_PATH_CSV, nrows=1000, usecols=USECOLS, lineterminator="\n"
+        ).fillna("")
+        test = pd.read_csv(
+            TEST_PATH_CSV, nrows=1000, usecols=USECOLS, lineterminator="\n"
+        ).fillna("")
     else:
-        train = pd.read_csv(TRAIN_PATH_CSV, nrows=NROWS, usecols=USECOLS, lineterminator='\n').fillna("")
-        test = pd.read_csv(TEST_PATH_CSV, nrows=NROWS, usecols=USECOLS, lineterminator='\n').fillna("")
+        train = pd.read_csv(
+            TRAIN_PATH_CSV, nrows=NROWS, usecols=USECOLS, lineterminator="\n"
+        ).fillna("")
+        test = pd.read_csv(
+            TEST_PATH_CSV, nrows=NROWS, usecols=USECOLS, lineterminator="\n"
+        ).fillna("")
     logging.info(f"Loading took {int(float(time.time() - START_TIME))/60} minute(s).")
 
     X_train = train
@@ -205,98 +226,150 @@ def main(args):
     y_test = test[CLASS_COL]
     y_test_labels = test[CLASS_NAMES]
 
-
     # ======== #
     # Training #
     # ======== #
 
     models = [
-        ("svm", LinearSVC()),
-        ("xgb_tree", XGBClassifier(booster="gbtree", n_jobs=N_JOBS)),
-        ("xgb_linear", XGBClassifier(booster="gblinear", n_jobs=N_JOBS)),
+        (
+            "svm",
+            LinearSVC(loss="squared_hinge", penalty="l2"),
+            {
+                "svm__tol": [0.01, 0.001],
+                "svm__C": [1, 2, 3],
+                "svm__max_iter": [1000, 3000, 5000],
+            },
+        ),
+        (
+            "xgb_tree",
+            XGBClassifier(
+                booster="gbtree",
+                n_estimators=100,
+                n_jobs=N_JOBS,
+                objective="multi:softmax",
+                verbosity=0,
+            ),
+            {
+                "xgb_tree__learning_rate": [0.1, 0.3],
+                "xgb_tree__max_depth": [3, 5],
+                "xgb_tree__min_child_weight": [1, 4],
+                "xgb_tree__n_estimators": [100],
+            },
+        ),
     ]
-
-    if TESTING:
-        models = [
-            ("svm", LinearSVC()),
-            ("xgb_tree", XGBClassifier(booster="gbtree", n_jobs=N_JOBS)),
-            ("xgb_linear", XGBClassifier(booster="gblinear", n_jobs=N_JOBS)),
-        ]
 
     # ========== #
     # Model loop #
     # ========== #
-    for model_name, model_obj in models:
-
-        if model_name.startswith("xgb"):
-            import warnings
-            warnings.filterwarnings("ignore")
+    for model_name, model_obj, parameters in models:
 
         OUTPUT_NAME = f"_{EXPERIMENT['name']}_{model_name}"
+        VECTORIZER = TfidfVectorizer(sublinear_tf=True)
 
         ### Experiment setup ###
         if EXPERIMENT_N == 0:
             logging.info("Experiment: Plain text.")
-            pipe = Pipeline([
-                ("features", FeatureUnion([
-                    ("plain", FNPipeline([
-                        ("extract_text", DataFrameColumnExtracter(TEXT_COL)),
-                        ("plain_vect", TfidfVectorizer()),
-                    ]))
-                ])),
-                (model_name, model_obj),
-            ])
+            pipe = Pipeline(
+                [
+                    (
+                        "features",
+                        FeatureUnion(
+                            [
+                                (
+                                    "plain",
+                                    FNPipeline(
+                                        [
+                                            (
+                                                "extract_text",
+                                                DataFrameColumnExtracter(TEXT_COL),
+                                            ),
+                                            ("plain_vect", VECTORIZER),
+                                        ]
+                                    ),
+                                )
+                            ]
+                        ),
+                    ),
+                    (model_name, model_obj),
+                ]
+            )
         elif EXPERIMENT_N == 1:
             logging.info("Experiment: Meta element addition.")
-            pipe = Pipeline([
-                ("features", FeatureUnion([
-                    ("plain", Pipeline([
-                        ("extract_text", DataFrameColumnExtracter(TEXT_COL)),
-                        ("plain_vect", TfidfVectorizer()),
-                    ])),
-                    ("meta", Pipeline([
-                        ("extract_meta", DataFrameColumnExtracter("meta")),
-                        ("meta_vect", TfidfVectorizer()),
-                    ]))
-                ], n_jobs=N_JOBS)),
-                (model_name, model_obj),
-            ])
-
+            pipe = Pipeline(
+                [
+                    (
+                        "features",
+                        FeatureUnion(
+                            [
+                                (
+                                    "plain",
+                                    FNPipeline(
+                                        [
+                                            (
+                                                "extract_text",
+                                                DataFrameColumnExtracter(TEXT_COL),
+                                            ),
+                                            ("plain_vect", VECTORIZER),
+                                        ]
+                                    ),
+                                ),
+                                (
+                                    "meta_title",
+                                    FNPipeline(
+                                        [
+                                            (
+                                                "extract_meta_title",
+                                                DataFrameColumnExtracter("meta_title"),
+                                            ),
+                                            ("meta_title_vect", VECTORIZER),
+                                        ]
+                                    ),
+                                ),
+                                (
+                                    "meta_keywords",
+                                    FNPipeline(
+                                        [
+                                            (
+                                                "extract_meta_keywords",
+                                                DataFrameColumnExtracter("meta_keywords"),
+                                            ),
+                                            ("meta_keywords_vect", VECTORIZER),
+                                        ]
+                                    ),
+                                ),
+                                (
+                                    "meta_description",
+                                    FNPipeline(
+                                        [
+                                            (
+                                                "extract_meta_description",
+                                                DataFrameColumnExtracter("meta_description"),
+                                            ),
+                                            ("meta_description_vect", VECTORIZER),
+                                        ]
+                                    ),
+                                ),
+                            ],
+                            n_jobs=N_JOBS,
+                        ),
+                    ),
+                    (model_name, model_obj),
+                ]
+            )
 
         ### Hyperparamter optimization ###
-        if TESTING:
-            parameters = {
-                "features__plain__plain_vect__lowercase": [True],
-                "features__plain__plain_vect__preprocessor": [None],
-                "features__plain__plain_vect__stop_words": [None],
-                "features__plain__plain_vect__max_df": [1.0],
-                "features__plain__plain_vect__min_df": [1],
-                "features__plain__plain_vect__max_features": [None],
-                "features__plain__plain_vect__norm": ["l2"],
-                "features__plain__plain_vect__sublinear_tf": [True],
-            }
-        else:
-            parameters = {
-                "features__plain__plain_vect__lowercase": [True],
-                "features__plain__plain_vect__preprocessor": [None],
-                "features__plain__plain_vect__stop_words": [None],
-                "features__plain__plain_vect__max_df": [0.25, 0.5, 0.75, 1.0],
-                "features__plain__plain_vect__min_df": [1],
-                "features__plain__plain_vect__max_features": [100, None],
-                "features__plain__plain_vect__norm": ["l2"],
-                "features__plain__plain_vect__sublinear_tf": [True],
-            }
-            
-
+        if not OPTIMIZATION:
+            parameters = {}
 
         logging.info(f"Begin training of {model_name}.")
 
         ### Grid search ###
-        grid = GridSearchCV(
+        grid = RandomizedSearchCV(
             pipe,
             parameters,
             cv=CV,
             error_score=0.0,
+            n_iter=10,
             n_jobs=N_JOBS,
             refit="precision",
             scoring=SCORING,
@@ -309,8 +382,8 @@ def main(args):
         with open(f"{RESULTS_PATH}/bestparams_{OUTPUT_NAME}.json", "w+") as f:
             json.dump(best_params, f)
 
-
         ### Prediction & Classification report ###
+        logging.info("Predicting.")
         y_pred = grid.predict(X_test)
 
         clf_report = classification_report(
@@ -323,6 +396,7 @@ def main(args):
         clf_report_df.to_csv(f"{RESULTS_PATH}/clfreport_{OUTPUT_NAME}.csv")
 
         ### Confusion matrix handling ###
+        logging.info("Computing the Confusion Matrix.")
         cm = confusion_matrix(y_test, y_pred)
         cm_df = pd.DataFrame(
             cm, index=np.unique(y_test_labels), columns=np.unique(y_train_labels)
@@ -330,8 +404,11 @@ def main(args):
         cm_df.to_csv(f"{RESULTS_PATH}/cm_{OUTPUT_NAME}.csv")
 
         ### Feature importance ###
-        tmp = dict(grid.best_estimator_.named_steps['features'].transformer_list).get("plain")
-        feature_names = tmp.get_feature_names()
+        logging.info("Computing the feature importance.")
+        feature_pipe = dict(grid.best_estimator_.named_steps["features"].transformer_list)
+        feature_names = []
+        for _, v in feature_pipe.items():
+            feature_names.extend(v.get_feature_names())
 
         if model_name == "xgb_tree":
             features_d = dict(
@@ -351,7 +428,6 @@ def main(args):
             )
             coefs_df.index.name = "class"
             coefs_df.to_csv(f"{RESULTS_PATH}/coefs_{OUTPUT_NAME}.csv.zip")
-
 
     ### PROGRAM DURATION ###
     logging.info(f"Run-time: {int(float(time.time() - START_TIME))/60} minute(s).")

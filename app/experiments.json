@@ -2,15 +2,16 @@
     "0" : {
         "name": "plain",
         "cols": ["url", "group_representative_label", "text"],
-        "info": "The plain text with title information (from meta tags), no other tags."
+        "info": "The plain text, no other tags."
     },
     "1" : {
         "name": "meta",
-        "cols": ["url", "group_representative_label", "text", "meta"],
-        "info": "Plain text + meta informations (title (like in EXPERIMENT 0), description and keywords."
+        "cols": ["url", "group_representative_label", "text", "meta_title", "meta_keywords", "meta_description"],
+        "info": "Plain text + meta informations (title, description and keywords)."
     },
     "2" : {
         "name": "golub_ardo_2005",
-        "cols": ["url", "group_representative_label", "text"]
+        "cols": ["url", "group_representative_label", "text"],
+        "info": "TODO"
     }
 }

@@ -183,6 +183,8 @@ def main(args):
     ### remove meta title from text ###
     data["text"] = data.apply(lambda row: row.text.replace(row.meta_title, ""), axis=1,)
 
+    ### 
+
     ### remove boilerplate html code ###
     if args.clean_boilerplate:
         logging.info("Cleaning HTML/XHTML/XML boilerplate...")
@@ -244,12 +246,6 @@ def main(args):
         )
 
     test_urls = ",".join(test.url.tolist())
-
-    ### remove duplicates ###
-    # TODO!!
-    # logging.info("Remove duplicates.")
-    # train = train.drop_duplicates().reset_index()
-    # test = test.drop_duplicates().reset_index()
 
     ### save to csv ###
     logging.info("Saving data.")

@@ -176,6 +176,19 @@ def extract_meta_informations(string: str, meta_type: str) -> list:
     return " ".join(list(set(results)))
 
 
+def extract_tagtexts(string: str, tag: str):
+    """ Extract text content from all elements 'tag'."""
+    try:      
+        tree = extract_tree(string, "html")
+        select = CSSSelector(tag, translator="html")
+    except:
+        tree = extract_tree(string, "xml")
+        select = CSSSelector(tag, translator="xml")
+        
+    results = [element.text_content() for element in select(tree)]
+    results = [x for x in results if x is not None]
+    return " ".join(list(set(results)))
+
 def extract_tree(string: str, markup_type: str) -> lxml.etree._Element:
     """ Extracts tree from string.
 
