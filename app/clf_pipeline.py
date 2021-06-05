@@ -1,5 +1,6 @@
 import argparse
 from datetime import datetime
+from itertools import combinations
 import json
 import logging
 from pathlib import Path
@@ -19,27 +20,13 @@ from sklearn.metrics import (
     f1_score,
     make_scorer,
     precision_score,
-    recall_score
+    recall_score,
 )
 from sklearn.pipeline import FeatureUnion, Pipeline
 from sklearn.preprocessing import LabelEncoder
 from sklearn.svm import LinearSVC
 
 from xgboost import XGBClassifier
-
-
-### TODO ###
-# welche columns laden?
-# TODO: Einstellungen
-# TODO: scoring
-#       https://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter
-# TODO: params updaten von tfidf
-# TODO: build custom classification report mit weiteren metriken
-#################################################################################
-# TODO: RFE implementieren
-# TODO: Permutation? klappt das überhaupt?
-# https://scikit-learn.org/stable/modules/generated/sklearn.inspection.permutation_importance.html
-#################################################################################
 
 
 class DataFrameColumnExtracter(TransformerMixin):
@@ -59,32 +46,109 @@ class FNPipeline(Pipeline):
             if isinstance(step, TfidfVectorizer):
                 return step.get_feature_names()
 
-def get_experiment_pipeline(n, model_name, model_obj, text_col, vectorizer):
+
+def get_experiment_pipeline(
+    n,
+    model_name,
+    model_obj,
+    text_col,
+    vectorizer,
+    n_jobs,
+):
     """ Get experiment pipeline by number."""
     pipe = []
+
+    texts = {
+        "plain_text": [
+            ("extract_text", DataFrameColumnExtracter(text_col)),
+            ("plain_vect", vectorizer),
+        ],
+        "a_text": [
+            ("extract_a", DataFrameColumnExtracter("<a>")),
+            ("a_vect", vectorizer),
+        ],
+        "b_text": [
+            ("extract_b", DataFrameColumnExtracter("<b>")),
+            ("b_vect", vectorizer),
+        ],
+        "em_text": [
+            ("extract_em", DataFrameColumnExtracter("<em>")),
+            ("em_vect", vectorizer),
+        ],
+        "h1_text": [
+            ("extract_h1", DataFrameColumnExtracter("<h1>")),
+            ("h1_vect", vectorizer),
+        ],
+        "h2_text": [
+            ("extract_h2", DataFrameColumnExtracter("<h2>")),
+            ("h2_vect", vectorizer),
+        ],
+        "h3_text": [
+            ("extract_h3", DataFrameColumnExtracter("<h3>")),
+            ("h3_vect", vectorizer),
+        ],
+        "h4_text": [
+            ("extract_h4", DataFrameColumnExtracter("<h4>")),
+            ("h4_vect", vectorizer),
+        ],
+        "h5_text": [
+            ("extract_h5", DataFrameColumnExtracter("<h5>")),
+            ("h5_vect", vectorizer),
+        ],
+        "h6_text": [
+            ("extract_h6", DataFrameColumnExtracter("<h6>")),
+            ("h6_vect", vectorizer),
+        ],
+        "i_text": [
+            ("extract_i", DataFrameColumnExtracter("<i>")),
+            ("i_vect", vectorizer),
+        ],
+        "li_text": [
+            ("extract_li", DataFrameColumnExtracter("<li>")),
+            ("li_vect", vectorizer),
+        ],
+        "meta_description_text": [
+            (
+                "extract_meta_description",
+                DataFrameColumnExtracter("<meta>_description"),
+            ),
+            ("meta_description_vect", vectorizer),
+        ],
+        "meta_keywords_text": [
+            ("extract_meta_keywords", DataFrameColumnExtracter("<meta>_keywords")),
+            ("meta_keywords_vect", vectorizer),
+        ],
+        "meta_title_text": [
+            ("extract_meta_title", DataFrameColumnExtracter("<meta>_title")),
+            ("meta_title_vect", vectorizer),
+        ],
+        "p_text": [
+            ("extract_p", DataFrameColumnExtracter("<p>")),
+            ("p_vect", vectorizer),
+        ],
+        "strong_text": [
+            ("extract_strong", DataFrameColumnExtracter("<strong>")),
+            ("strong_vect", vectorizer),
+        ],
+        "title_text": [
+            ("extract_title", DataFrameColumnExtracter("<title>")),
+            ("title_vect", vectorizer),
+        ],
+    }
+
+
+    model = (model_name, model_obj)
+
     if n == 0:
         pipe = Pipeline(
             [
                 (
                     "features",
                     FeatureUnion(
-                        [
-                            (
-                                "plain",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_text",
-                                            DataFrameColumnExtracter(text_col),
-                                        ),
-                                        ("plain_vect", vectorizer),
-                                    ]
-                                ),
-                            )
-                        ]
+                        [("plain", FNPipeline(texts["plain_text"]))], n_jobs=n_jobs
                     ),
                 ),
-                (model_name, model_obj),
+                model,
             ]
         )
     elif n == 1:
@@ -94,65 +158,18 @@ def get_experiment_pipeline(n, model_name, model_obj, text_col, vectorizer):
                     "features",
                     FeatureUnion(
                         [
-                            (
-                                "plain",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_text",
-                                            DataFrameColumnExtracter(text_col),
-                                        ),
-                                        ("plain_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "meta_title",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_meta_title",
-                                            DataFrameColumnExtracter(
-                                                "<meta>_title"
-                                            ),
-                                        ),
-                                        ("meta_title_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "meta_keywords",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_meta_keywords",
-                                            DataFrameColumnExtracter(
-                                                "<meta>_keywords"
-                                            ),
-                                        ),
-                                        ("meta_keywords_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
+                            ("plain", FNPipeline(texts["plain_text"])),
+                            ("meta_title", FNPipeline(texts["meta_title_text"])),
+                            ("meta_keywords", FNPipeline(texts["meta_keywords_text"])),
                             (
                                 "meta_description",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_meta_description",
-                                            DataFrameColumnExtracter(
-                                                "<meta>_description"
-                                            ),
-                                        ),
-                                        ("meta_description_vect", vectorizer),
-                                    ]
-                                ),
+                                FNPipeline(texts["meta_description_text"]),
                             ),
                         ],
-                        n_jobs=N_JOBS,
+                        n_jobs=n_jobs,
                     ),
                 ),
-                (model_name, model_obj),
+                model,
             ]
         )
     elif n == 101:
@@ -162,53 +179,17 @@ def get_experiment_pipeline(n, model_name, model_obj, text_col, vectorizer):
                     "features",
                     FeatureUnion(
                         [
-                            (
-                                "meta_title",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_meta_title",
-                                            DataFrameColumnExtracter(
-                                                "<meta>_title"
-                                            ),
-                                        ),
-                                        ("meta_title_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "meta_keywords",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_meta_keywords",
-                                            DataFrameColumnExtracter(
-                                                "<meta>_keywords"
-                                            ),
-                                        ),
-                                        ("meta_keywords_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
+                            ("meta_title", FNPipeline(texts["meta_title_text"])),
+                            ("meta_keywords", FNPipeline(texts["meta_keywords_text"])),
                             (
                                 "meta_description",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_meta_description",
-                                            DataFrameColumnExtracter(
-                                                "<meta>_description"
-                                            ),
-                                        ),
-                                        ("meta_description_vect", vectorizer),
-                                    ]
-                                ),
+                                FNPipeline(texts["meta_description_text"]),
                             ),
                         ],
-                        n_jobs=N_JOBS,
+                        n_jobs=n_jobs,
                     ),
                 ),
-                (model_name, model_obj),
+                model,
             ]
         )
     elif n == 2:
@@ -218,163 +199,25 @@ def get_experiment_pipeline(n, model_name, model_obj, text_col, vectorizer):
                     "features",
                     FeatureUnion(
                         [
-                            (
-                                "plain",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_text",
-                                            DataFrameColumnExtracter(text_col),
-                                        ),
-                                        ("plain_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "meta_title",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_meta_title",
-                                            DataFrameColumnExtracter(
-                                                "<meta>_title"
-                                            ),
-                                        ),
-                                        ("meta_title_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "meta_keywords",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_meta_keywords",
-                                            DataFrameColumnExtracter(
-                                                "<meta>_keywords"
-                                            ),
-                                        ),
-                                        ("meta_keywords_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
+                            ("plain", FNPipeline(texts["plain_text"])),
+                            ("meta_title", FNPipeline(texts["meta_title_text"])),
+                            ("meta_keywords", FNPipeline(texts["meta_keywords_text"])),
                             (
                                 "meta_description",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_meta_description",
-                                            DataFrameColumnExtracter(
-                                                "<meta>_description"
-                                            ),
-                                        ),
-                                        ("meta_description_vect", vectorizer),
-                                    ]
-                                ),
+                                FNPipeline(texts["meta_description_text"]),
                             ),
-                            (
-                                "title",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_title",
-                                            DataFrameColumnExtracter(
-                                                "<title>"
-                                            ),
-                                        ),
-                                        ("title_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "h1",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_h1",
-                                            DataFrameColumnExtracter(
-                                                "<h1>"
-                                            ),
-                                        ),
-                                        ("h1_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "h2",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_h2",
-                                            DataFrameColumnExtracter(
-                                                "<h2>"
-                                            ),
-                                        ),
-                                        ("h2_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "h3",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_h3",
-                                            DataFrameColumnExtracter(
-                                                "<h3>"
-                                            ),
-                                        ),
-                                        ("h3_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "h4",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_h4",
-                                            DataFrameColumnExtracter(
-                                                "<h4>"
-                                            ),
-                                        ),
-                                        ("h4_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "h5",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_h5",
-                                            DataFrameColumnExtracter(
-                                                "<h5>"
-                                            ),
-                                        ),
-                                        ("h5_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "h6",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_h6",
-                                            DataFrameColumnExtracter(
-                                                "<h6>"
-                                            ),
-                                        ),
-                                        ("h6_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
+                            ("title", FNPipeline(texts["title_text"])),
+                            ("h1", FNPipeline(texts["h1_text"])),
+                            ("h2", FNPipeline(texts["h2_text"])),
+                            ("h3", FNPipeline(texts["h3_text"])),
+                            ("h4", FNPipeline(texts["h4_text"])),
+                            ("h5", FNPipeline(texts["h5_text"])),
+                            ("h6", FNPipeline(texts["h6_text"])),
                         ],
-                        n_jobs=N_JOBS,
+                        n_jobs=n_jobs,
                     ),
                 ),
-                (model_name, model_obj),
+                model,
             ]
         )
     elif n == 201:
@@ -384,151 +227,24 @@ def get_experiment_pipeline(n, model_name, model_obj, text_col, vectorizer):
                     "features",
                     FeatureUnion(
                         [
-                            (
-                                "meta_title",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_meta_title",
-                                            DataFrameColumnExtracter(
-                                                "<meta>_title"
-                                            ),
-                                        ),
-                                        ("meta_title_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "meta_keywords",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_meta_keywords",
-                                            DataFrameColumnExtracter(
-                                                "<meta>_keywords"
-                                            ),
-                                        ),
-                                        ("meta_keywords_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
+                            ("meta_title", FNPipeline(texts["meta_title_text"])),
+                            ("meta_keywords", FNPipeline(texts["meta_keywords_text"])),
                             (
                                 "meta_description",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_meta_description",
-                                            DataFrameColumnExtracter(
-                                                "<meta>_description"
-                                            ),
-                                        ),
-                                        ("meta_description_vect", vectorizer),
-                                    ]
-                                ),
+                                FNPipeline(texts["meta_description_text"]),
                             ),
-                            (
-                                "title",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_title",
-                                            DataFrameColumnExtracter(
-                                                "<title>"
-                                            ),
-                                        ),
-                                        ("title_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "h1",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_h1",
-                                            DataFrameColumnExtracter(
-                                                "<h1>"
-                                            ),
-                                        ),
-                                        ("h1_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "h2",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_h2",
-                                            DataFrameColumnExtracter(
-                                                "<h2>"
-                                            ),
-                                        ),
-                                        ("h2_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "h3",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_h3",
-                                            DataFrameColumnExtracter(
-                                                "<h3>"
-                                            ),
-                                        ),
-                                        ("h3_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "h4",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_h4",
-                                            DataFrameColumnExtracter(
-                                                "<h4>"
-                                            ),
-                                        ),
-                                        ("h4_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "h5",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_h5",
-                                            DataFrameColumnExtracter(
-                                                "<h5>"
-                                            ),
-                                        ),
-                                        ("h5_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "h6",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_h6",
-                                            DataFrameColumnExtracter(
-                                                "<h6>"
-                                            ),
-                                        ),
-                                        ("h6_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
+                            ("title", FNPipeline(texts["title_text"])),
+                            ("h1", FNPipeline(texts["h1_text"])),
+                            ("h2", FNPipeline(texts["h2_text"])),
+                            ("h3", FNPipeline(texts["h3_text"])),
+                            ("h4", FNPipeline(texts["h4_text"])),
+                            ("h5", FNPipeline(texts["h5_text"])),
+                            ("h6", FNPipeline(texts["h6_text"])),
                         ],
-                        n_jobs=N_JOBS,
+                        n_jobs=n_jobs,
                     ),
                 ),
-                (model_name, model_obj),
+                model,
             ]
         )
     elif n == 3:
@@ -538,177 +254,23 @@ def get_experiment_pipeline(n, model_name, model_obj, text_col, vectorizer):
                     "features",
                     FeatureUnion(
                         [
-                            (
-                                "plain",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_text",
-                                            DataFrameColumnExtracter(text_col),
-                                        ),
-                                        ("plain_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "title",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_title",
-                                            DataFrameColumnExtracter(
-                                                "<title>"
-                                            ),
-                                        ),
-                                        ("title_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "h1",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_h1",
-                                            DataFrameColumnExtracter(
-                                                "<h1>"
-                                            ),
-                                        ),
-                                        ("h1_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "h2",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_h2",
-                                            DataFrameColumnExtracter(
-                                                "<h2>"
-                                            ),
-                                        ),
-                                        ("h2_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "h3",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_h3",
-                                            DataFrameColumnExtracter(
-                                                "<h3>"
-                                            ),
-                                        ),
-                                        ("h3_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "b",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_b",
-                                            DataFrameColumnExtracter(
-                                                "<b>"
-                                            ),
-                                        ),
-                                        ("hb_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "strong",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_strong",
-                                            DataFrameColumnExtracter(
-                                                "<strong>"
-                                            ),
-                                        ),
-                                        ("strong_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "em",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_em",
-                                            DataFrameColumnExtracter(
-                                                "<em>"
-                                            ),
-                                        ),
-                                        ("em_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "i",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_i",
-                                            DataFrameColumnExtracter(
-                                                "<i>"
-                                            ),
-                                        ),
-                                        ("i_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "p",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_p",
-                                            DataFrameColumnExtracter(
-                                                "<p>"
-                                            ),
-                                        ),
-                                        ("p_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "a",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_a",
-                                            DataFrameColumnExtracter(
-                                                "<a>"
-                                            ),
-                                        ),
-                                        ("a_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "li",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_li",
-                                            DataFrameColumnExtracter(
-                                                "<li>"
-                                            ),
-                                        ),
-                                        ("li_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
+                            ("plain", FNPipeline(texts["plain_text"])),
+                            ("title", FNPipeline(texts["title_text"])),
+                            ("h1", FNPipeline(texts["h1_text"])),
+                            ("h2", FNPipeline(texts["h2_text"])),
+                            ("h3", FNPipeline(texts["h3_text"])),
+                            ("a", FNPipeline(texts["a_text"])),
+                            ("b", FNPipeline(texts["b_text"])),
+                            ("em", FNPipeline(texts["em_text"])),
+                            ("i", FNPipeline(texts["i_text"])),
+                            ("li", FNPipeline(texts["li_text"])),
+                            ("p", FNPipeline(texts["p_text"])),
+                            ("strong", FNPipeline(texts["strong_text"])),
                         ],
-                        n_jobs=N_JOBS,
+                        n_jobs=n_jobs,
                     ),
                 ),
-                (model_name, model_obj),
+                model,
             ]
         )
     elif n == 301:
@@ -718,169 +280,29 @@ def get_experiment_pipeline(n, model_name, model_obj, text_col, vectorizer):
                     "features",
                     FeatureUnion(
                         [
-                            (
-                                "title",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_title",
-                                            DataFrameColumnExtracter(
-                                                "<title>"
-                                            ),
-                                        ),
-                                        ("title_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "h1",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_h1",
-                                            DataFrameColumnExtracter(
-                                                "<h1>"
-                                            ),
-                                        ),
-                                        ("h1_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "h2",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_h2",
-                                            DataFrameColumnExtracter(
-                                                "<h2>"
-                                            ),
-                                        ),
-                                        ("h2_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "h3",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_h3",
-                                            DataFrameColumnExtracter(
-                                                "<h3>"
-                                            ),
-                                        ),
-                                        ("h3_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "b",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_b",
-                                            DataFrameColumnExtracter(
-                                                "<b>"
-                                            ),
-                                        ),
-                                        ("hb_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "strong",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_strong",
-                                            DataFrameColumnExtracter(
-                                                "<strong>"
-                                            ),
-                                        ),
-                                        ("strong_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "em",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_em",
-                                            DataFrameColumnExtracter(
-                                                "<em>"
-                                            ),
-                                        ),
-                                        ("em_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "i",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_i",
-                                            DataFrameColumnExtracter(
-                                                "<i>"
-                                            ),
-                                        ),
-                                        ("i_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "p",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_p",
-                                            DataFrameColumnExtracter(
-                                                "<p>"
-                                            ),
-                                        ),
-                                        ("p_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "a",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_a",
-                                            DataFrameColumnExtracter(
-                                                "<a>"
-                                            ),
-                                        ),
-                                        ("a_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
-                            (
-                                "li",
-                                FNPipeline(
-                                    [
-                                        (
-                                            "extract_li",
-                                            DataFrameColumnExtracter(
-                                                "<li>"
-                                            ),
-                                        ),
-                                        ("li_vect", vectorizer),
-                                    ]
-                                ),
-                            ),
+                            ("title", FNPipeline(texts["title_text"])),
+                            ("h1", FNPipeline(texts["h1_text"])),
+                            ("h2", FNPipeline(texts["h2_text"])),
+                            ("h3", FNPipeline(texts["h3_text"])),
+                            ("a", FNPipeline(texts["a_text"])),
+                            ("b", FNPipeline(texts["b_text"])),
+                            ("em", FNPipeline(texts["em_text"])),
+                            ("i", FNPipeline(texts["i_text"])),
+                            ("li", FNPipeline(texts["li_text"])),
+                            ("p", FNPipeline(texts["p_text"])),
+                            ("strong", FNPipeline(texts["strong_text"])),
                         ],
-                        n_jobs=N_JOBS,
+                        n_jobs=n_jobs,
                     ),
                 ),
-                (model_name, model_obj),
+                model,
             ]
         )
+    
 
     return pipe
+
+
 
 
 def parse_arguments():
@@ -895,49 +317,49 @@ def parse_arguments():
         "--data_clean",
         "-dc",
         action="store_true",
-        help="Indicates if datatset with HTML, XHTML or XML boilerplate removal should be loaded."
+        help="Indicates if datatset with HTML, XHTML or XML boilerplate removal should be loaded.",
     )
     parser.add_argument(
         "--data_shortened",
         "-ds",
         type=int,
         default=None,
-        help="Indicates if dataset with specific number of rows should be loaded (default: None)."
+        help="Indicates if dataset with specific number of rows should be loaded (default: None).",
     )
     parser.add_argument(
         "--experiment",
         "-e",
         type=int,
         default=0,
-        help="Indicates number of experiment."
+        help="Indicates number of experiment.",
     )
     parser.add_argument(
         "--n_jobs",
         "-nj",
         type=int,
         default=1,
-        help="Indicates the number of processors used for computation (default: 1)."
+        help="Indicates the number of processors used for computation (default: 1).",
     )
     parser.add_argument(
         "--specific_country",
         "-sc",
         type=str,
         default="",
-        help="Load dataset with only given ISO2 country code (default: '' = all)."
+        help="Load dataset with only given ISO2 country code (default: '' = all).",
     )
     parser.add_argument(
         "--text_col",
         "-tc",
         type=str,
         default="text",
-        help="Indicating the column with text (default: 'text')."
+        help="Indicating the column with text (default: 'text').",
     )
     parser.add_argument(
         "--testing",
         "-t",
         action="store_true",
         help="Starts testing mode with a small subset of the corpus \
-						and no tunable parameters."
+						and no tunable parameters.",
     )
 
     return parser.parse_args()
@@ -1034,10 +456,7 @@ def main(args):
     # ======== #
 
     models = [
-        (
-            "svm",
-            LinearSVC(loss="squared_hinge", penalty="l2")
-        ),
+        ("svm", LinearSVC(loss="squared_hinge", penalty="l2")),
         (
             "xgb_tree",
             XGBClassifier(
@@ -1046,8 +465,8 @@ def main(args):
                 n_jobs=N_JOBS,
                 objective="multi:softmax",
                 verbosity=0,
-            )
-        )
+            ),
+        ),
     ]
 
     # ========== #
@@ -1062,8 +481,10 @@ def main(args):
         VECTORIZER = TfidfVectorizer(sublinear_tf=True)
 
         ### Experiment setup ###
-        pipe = get_experiment_pipeline(EXPERIMENT_N, model_name, model_obj, TEXT_COL, VECTORIZER)
-        
+        pipe = get_experiment_pipeline(
+            EXPERIMENT_N, model_name, model_obj, TEXT_COL, VECTORIZER, N_JOBS
+        )
+
         ### Training ###
         logging.info(f"Begin training of {model_name}.")
         pipe.fit(X_train, y_train)
@@ -1121,7 +542,7 @@ def main(args):
         )
 
     ### PROGRAM DURATION ###
-    logging.info(f"Run-time: {int(float(time.time() - START_TIME))/60} minute(s).")
+    logging.info(f"Run-time: {int(float(time.time() - START_TIME))/60} minute(s).\n")
 
 
 if __name__ == "__main__":

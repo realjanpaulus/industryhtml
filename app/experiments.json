@@ -38,6 +38,9 @@
             "url", 
             "group_representative_label", 
             "text",
+            "<meta>_title", 
+            "<meta>_keywords", 
+            "<meta>_description",
             "<title>",
             "<h1>",
             "<h2>",
@@ -54,6 +57,9 @@
             "url", 
             "group_representative_label", 
             "text",
+            "<meta>_title", 
+            "<meta>_keywords", 
+            "<meta>_description",
             "<title>",
             "<h1>",
             "<h2>",
@@ -65,7 +71,7 @@
         "info": "Title + headings + meta informations (title, description and keywords) (see GOLUB, ARDO, 'Importance of HTML Structural Elements and Metadata in Automated Subject Classification')"
     },
     "3" : {
-        "name": "özel_2011",
+        "name": "oezel_2011",
         "cols": [
             "url", 
             "group_representative_label", 
@@ -85,7 +91,7 @@
         "info": "Plain text + title + h1-h3 + b + strong + em + i + p + a + li (see ÖZEL, 'A web page classification system based on a genetic algorithm using tagged-terms as features')"
     },
     "301" : {
-        "name": "özel_2011_only_elements",
+        "name": "oezel_2011_only_elements",
         "cols": [
             "url", 
             "group_representative_label", 
@@ -103,5 +109,7 @@
             "<li>"
         ],
         "info": "Plain text + title + h1-h3 + b + strong + em + i + p + a + li (see ÖZEL, 'A web page classification system based on a genetic algorithm using tagged-terms as features')"
-    }
+    },
+    "4" : "TODO; vielleicht alle hervorhebe elemente?"
+
 }
