@@ -1,45 +1,45 @@
 {
     "0" : {
-        "name": "plain",
+        "name": "0_plain",
         "cols": [
-            "url", 
-            "group_representative_label", 
+            "url",
+            "group_representative_label",
             "text"
         ],
         "info": "The plain text, no other tags."
     },
     "1" : {
-        "name": "meta",
+        "name": "1_meta",
         "cols": [
-            "url", 
-            "group_representative_label", 
-            "text", 
-            "<meta>_title", 
-            "<meta>_keywords", 
+            "url",
+            "group_representative_label",
+            "text",
+            "<meta>_title",
+            "<meta>_keywords",
             "<meta>_description"
         ],
-        "info": "Plain text + meta informations (title, description and keywords)."
+        "info": "Plain text + meta informations (title, description and keywords) (PIERRE, 'On the Automated Classification of Web Sites')."
     },
     "101" : {
-        "name": "meta_only_elements",
+        "name": "101_meta_only_elements",
         "cols": [
-            "url", 
-            "group_representative_label", 
+            "url",
+            "group_representative_label",
             "text",
-            "<meta>_title", 
-            "<meta>_keywords", 
+            "<meta>_title",
+            "<meta>_keywords",
             "<meta>_description"
         ],
-        "info": "Meta informations (title, description and keywords)."
+        "info": "Meta informations (title, description and keywords) (PIERRE, 'On the Automated Classification of Web Sites')."
     },
     "2" : {
-        "name": "golub_2005",
+        "name": "2_meta_headings",
         "cols": [
-            "url", 
-            "group_representative_label", 
+            "url",
+            "group_representative_label",
             "text",
-            "<meta>_title", 
-            "<meta>_keywords", 
+            "<meta>_title",
+            "<meta>_keywords",
             "<meta>_description",
             "<title>",
             "<h1>",
@@ -52,13 +52,13 @@
         "info": "Plain text + title + headings + meta informations (title, description and keywords) (see GOLUB, ARDO, 'Importance of HTML Structural Elements and Metadata in Automated Subject Classification')"
     },
     "201" : {
-        "name": "golub_2005_only_elements",
+        "name": "201_meta_headings_only_elements",
         "cols": [
-            "url", 
-            "group_representative_label", 
+            "url",
+            "group_representative_label",
             "text",
-            "<meta>_title", 
-            "<meta>_keywords", 
+            "<meta>_title",
+            "<meta>_keywords",
             "<meta>_description",
             "<title>",
             "<h1>",
@@ -71,10 +71,10 @@
         "info": "Title + headings + meta informations (title, description and keywords) (see GOLUB, ARDO, 'Importance of HTML Structural Elements and Metadata in Automated Subject Classification')"
     },
     "3" : {
-        "name": "oezel_2011",
+        "name": "3_headings_formatting_structure",
         "cols": [
-            "url", 
-            "group_representative_label", 
+            "url",
+            "group_representative_label",
             "text",
             "<title>",
             "<h1>",
@@ -91,10 +91,10 @@
         "info": "Plain text + title + h1-h3 + b + strong + em + i + p + a + li (see ÖZEL, 'A web page classification system based on a genetic algorithm using tagged-terms as features')"
     },
     "301" : {
-        "name": "oezel_2011_only_elements",
+        "name": "301_headings_formatting_structure_only_elements",
         "cols": [
-            "url", 
-            "group_representative_label", 
+            "url",
+            "group_representative_label",
             "text",
             "<title>",
             "<h1>",
@@ -111,10 +111,10 @@
         "info": "Title + h1-h3 + b + strong + em + i + p + a + li (see ÖZEL, 'A web page classification system based on a genetic algorithm using tagged-terms as features')"
     },
     "4" : {
-        "name": "text_formatting",
+        "name": "4_text_formatting",
         "cols": [
-            "url", 
-            "group_representative_label", 
+            "url",
+            "group_representative_label",
             "text",
             "<b>",
             "<strong>",
@@ -124,10 +124,10 @@
         "info": "Plain text + Text Formatting elements"
     },
     "401" : {
-        "name": "text_formatting_only_elements",
+        "name": "401_text_formatting_only_elements",
         "cols": [
-            "url", 
-            "group_representative_label", 
+            "url",
+            "group_representative_label",
             "text",
             "<b>",
             "<strong>",
@@ -135,6 +135,49 @@
             "<i>"
         ],
         "info": "Text Formatting elements"
+    },
+    "5" : {
+        "name": "5_links",
+        "cols": [
+            "url",
+            "group_representative_label",
+            "text",
+            "<a>"
+        ],
+        "info": "Plain text + links"
+    },
+    "501" : {
+        "name": "501_links_only_elements",
+        "cols": [
+            "url",
+            "group_representative_label",
+            "text",
+            "<a>"
+        ],
+        "info": "Plain text + links"
+    },
+    "6" : {
+        "name": "6_structure",
+        "cols": [
+            "url",
+            "group_representative_label",
+            "text",
+            "<a>",
+            "<li>",
+            "<p>"
+        ],
+        "info": "Plain text + structure elements"
+    },
+    "601" : {
+        "name": "6_structure_only_elements",
+        "cols": [
+            "url",
+            "group_representative_label",
+            "text",
+            "<a>",
+            "<li>",
+            "<p>"
+        ],
+        "info": "Structure elements"
     }
-
 }

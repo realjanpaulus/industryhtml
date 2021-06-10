@@ -9,30 +9,33 @@ from lxml import html, etree
 import numpy as np
 import pandas as pd
 
-import syntok.segmenter as segmenter
-from flair.data import Sentence
-from flair.models import SequenceTagger
-
-import logging
-logging.getLogger("flair").setLevel(logging.ERROR)
 
 try:
+    import syntok.segmenter as segmenter
+    from flair.data import Sentence
+    from flair.models import SequenceTagger
+
+    import logging
+    logging.getLogger("flair").setLevel(logging.ERROR)
+
     TAGGER = SequenceTagger.load("pos-multi-fast")
     TOKEN_PATTERN = re.compile(r"\w+")
+
+    def filter_nouns(text: str):
+        tokens = TOKEN_PATTERN.findall(text)
+        sentence = Sentence(tokens, use_tokenizer=False)
+        TAGGER.predict(sentence)
+        return " ".join(filter_tokens(sentence))
+
+    def filter_tokens(sentence: Sentence) -> List[str]:
+        nouns = [token.text for token in sentence if token.get_tag("upos").value == "NOUN"]
+        return [
+            token.lower() for token in nouns if len(token) > 1 and not any(c.isdigit() for c in token)
+        ]
 except:
     print("Loading of Sequence Tagger Model failed!")
 
-def filter_nouns(text: str):
-    tokens = TOKEN_PATTERN.findall(text)
-    sentence = Sentence(tokens, use_tokenizer=False)
-    TAGGER.predict(sentence)
-    return " ".join(filter_tokens(sentence))
-    
-def filter_tokens(sentence: Sentence) -> List[str]:
-    nouns = [token.text for token in sentence if token.get_tag("upos").value == "NOUN"]
-    return [
-        token.lower() for token in nouns if len(token) > 1 and not any(c.isdigit() for c in token)
-    ]
+
 
 
 # ================ #
@@ -166,7 +169,7 @@ def detect_XML(string: str) -> str:
 
 
 def extract_meta_informations(string: str, meta_type: str) -> list:
-    """ Extracts meta information from 'title'-, 'keyword'- and description'- 
+    """ Extracts meta information from 'title'-, 'keyword'- and description'-
         meta elements (by choice) and returns the content in a list.
     """
     # title already in text
@@ -176,38 +179,38 @@ def extract_meta_informations(string: str, meta_type: str) -> list:
         tags = ['meta[property="og:keyword"]', 'meta[name="keyword"]']
     elif meta_type == "description":
         tags = ['meta[property="og:description"]', 'meta[name="description"]']
-    
+
     else:
         tags = ['meta[property="og:description"]',
                 'meta[name="description"]',
                 'meta[property="og:keyword"]',
-                'meta[name="keyword"]', 
-                'meta[property="og:title"]', 
+                'meta[name="keyword"]',
+                'meta[property="og:title"]',
                 'meta[name="title"]']
 
     tags = ", ".join(tags)
 
-    
-    try:      
+
+    try:
         tree = extract_tree(string, "html")
         select = CSSSelector(tags, translator="html")
     except:
         tree = extract_tree(string, "xml")
         select = CSSSelector(tags, translator="xml")
-        
+
     results = [element.get('content') for element in select(tree)]
     results = [x for x in results if x is not None]
     return " ".join(list(set(results)))
 
 def extract_tagtexts(string: str, tag: str):
     """ Extract text content from all elements inside given tag."""
-    try:      
+    try:
         tree = extract_tree(string, "html")
         select = CSSSelector(tag, translator="html")
     except:
         tree = extract_tree(string, "xml")
         select = CSSSelector(tag, translator="xml")
-        
+
     results = [element.text_content() for element in select(tree)]
     results = [x for x in results if x is not None]
     return " ".join(list(set(results)))

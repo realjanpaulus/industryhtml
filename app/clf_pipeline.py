@@ -38,7 +38,7 @@ class DataFrameColumnExtracter(TransformerMixin):
 
     def transform(self, X, y=None):
         return X[self.column]
-        
+
 
 class FNPipeline(Pipeline):
     def get_feature_names(self):
@@ -298,7 +298,109 @@ def get_experiment_pipeline(
                 model,
             ]
         )
-    
+    elif n == 4:
+        pipe = Pipeline(
+            [
+                (
+                    "features",
+                    FeatureUnion(
+                        [
+                            ("plain", FNPipeline(texts["plain_text"])),
+                            ("b", FNPipeline(texts["b_text"])),
+                            ("em", FNPipeline(texts["em_text"])),
+                            ("i", FNPipeline(texts["i_text"])),
+                            ("strong", FNPipeline(texts["strong_text"])),
+                        ],
+                        n_jobs=n_jobs,
+                    ),
+                ),
+                model,
+            ]
+        )
+    elif n == 401:
+        pipe = Pipeline(
+            [
+                (
+                    "features",
+                    FeatureUnion(
+                        [
+                            ("b", FNPipeline(texts["b_text"])),
+                            ("em", FNPipeline(texts["em_text"])),
+                            ("i", FNPipeline(texts["i_text"])),
+                            ("strong", FNPipeline(texts["strong_text"])),
+                        ],
+                        n_jobs=n_jobs,
+                    ),
+                ),
+                model,
+            ]
+        )
+    elif n == 5:
+        pipe = Pipeline(
+            [
+                (
+                    "features",
+                    FeatureUnion(
+                        [
+                            ("plain", FNPipeline(texts["plain_text"])),
+                            ("a", FNPipeline(texts["a_text"])),
+                        ],
+                        n_jobs=n_jobs,
+                    ),
+                ),
+                model,
+            ]
+        )
+    elif n == 501:
+        pipe = Pipeline(
+            [
+                (
+                    "features",
+                    FeatureUnion(
+                        [
+                            ("a", FNPipeline(texts["a_text"])),
+                        ],
+                        n_jobs=n_jobs,
+                    ),
+                ),
+                model,
+            ]
+        )
+    elif n == 6:
+        pipe = Pipeline(
+            [
+                (
+                    "features",
+                    FeatureUnion(
+                        [
+                            ("plain", FNPipeline(texts["plain_text"])),
+                            ("a", FNPipeline(texts["a_text"])),
+                            ("li", FNPipeline(texts["li_text"])),
+                            ("p", FNPipeline(texts["p_text"])),
+                        ],
+                        n_jobs=n_jobs,
+                    ),
+                ),
+                model,
+            ]
+        )
+    elif n == 601:
+        pipe = Pipeline(
+            [
+                (
+                    "features",
+                    FeatureUnion(
+                        [
+                            ("a", FNPipeline(texts["a_text"])),
+                            ("li", FNPipeline(texts["li_text"])),
+                            ("p", FNPipeline(texts["p_text"])),
+                        ],
+                        n_jobs=n_jobs,
+                    ),
+                ),
+                model,
+            ]
+        )
 
     return pipe
 
@@ -464,7 +566,7 @@ def main(args):
     # ======== #
 
     models = [
-        ("svm", LinearSVC(loss="squared_hinge", penalty="l2")),
+        ("svm", LinearSVC()),
         (
             "xgb_tree",
             XGBClassifier(

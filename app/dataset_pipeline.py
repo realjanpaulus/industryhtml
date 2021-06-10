@@ -13,10 +13,9 @@ from sklearn.model_selection import train_test_split
 from tqdm import tqdm
 tqdm.pandas()
 
-from utils import clean_boilerplate, extract_meta_informations, extract_tagtexts, filter_nouns
+from utils import clean_boilerplate, extract_meta_informations, extract_tagtexts
 
-import logging
-logging.getLogger("flair").setLevel(logging.ERROR)
+
 
 
 def get_code(code_list, identifier):
@@ -265,7 +264,7 @@ def main(args):
         "<meta>_keywords",
         "<meta>_description",
         "<title>",
-        "<h1>", 
+        "<h1>",
         "<h2>",
         "<h3>",
         "<h4>",
@@ -317,6 +316,10 @@ def main(args):
     ### use pos tagging ###
     if POS_TAGGING:
         logging.info("Extracting nouns from text columns.")
+
+        from utils import filter_nouns
+        logging.getLogger("flair").setLevel(logging.ERROR)
+
         train["text"] = train.progress_apply(lambda row: filter_nouns(row["text"]), axis=1)
         train["<meta>_title"] = train.progress_apply(lambda row: filter_nouns(row["<meta>_title"]), axis=1)
         train["<meta>_keywords"] = train.progress_apply(lambda row: filter_nouns(row["<meta>_keywords"] ), axis=1)
