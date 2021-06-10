@@ -8,9 +8,15 @@ import time
 from langdetect import detect
 import numpy as np
 import pandas as pd
+pd.set_option('mode.chained_assignment', None)
 from sklearn.model_selection import train_test_split
+from tqdm import tqdm
+tqdm.pandas()
 
-from utils import clean_boilerplate, extract_meta_informations, extract_tagtexts
+from utils import clean_boilerplate, extract_meta_informations, extract_tagtexts, filter_nouns
+
+import logging
+logging.getLogger("flair").setLevel(logging.ERROR)
 
 
 def get_code(code_list, identifier):
@@ -81,6 +87,12 @@ def parse_arguments():
         help="Sets maximum number of rows (default: None).",
     )
     parser.add_argument(
+        "--pos_tagging",
+        "-pt",
+        action="store_true",
+        help="Extracts nouns from text."
+    )
+    parser.add_argument(
         "--specific_country",
         "-sc",
         type=str,
@@ -119,6 +131,11 @@ def main(args):
     if args.clean_boilerplate:
         CLEAN = "c"
 
+    POS_TAGGING = args.pos_tagging
+    POS_NAME = ""
+    if POS_TAGGING:
+        POS_NAME = "p"
+
     KEEP_HTML_COL = args.keep_html_col
 
     CLASS_COL = "group_representative"
@@ -128,9 +145,9 @@ def main(args):
     DATA_PATH_JSON = DATA_DIR_PATH + "data.ndjson"
     INDUSTRY_CODES_PATH = DATA_DIR_PATH + "industries"
 
-    TRAIN_PATH_CSV = DATA_DIR_PATH + CLEAN + "train" + LANG + ROWS + ".csv"
-    TEST_PATH_CSV = DATA_DIR_PATH + CLEAN + "test" + LANG + ROWS + ".csv"
-    TEST_URL_TXT = args.path + CLEAN + "testurls" + LANG + ROWS + ".txt"
+    TRAIN_PATH_CSV = DATA_DIR_PATH + CLEAN + POS_NAME + "train" + LANG + ROWS + ".csv"
+    TEST_PATH_CSV = DATA_DIR_PATH + CLEAN + POS_NAME + "test" + LANG + ROWS + ".csv"
+    TEST_URL_TXT = args.path + CLEAN + POS_NAME + "testurls" + LANG + ROWS + ".txt"
     TEST_SIZE = args.test_size
 
     ### logger ###
@@ -147,16 +164,15 @@ def main(args):
     data_records = map(json.loads, open(DATA_PATH_JSON))
     data = pd.DataFrame.from_records(data_records, nrows=args.max_rows)
     data = data.drop_duplicates()
-    data
 
     ### add country information ###
     if not args.ignore_country:
         logging.info("Extract and appending country information.")
-        data["country"] = data.apply(lambda row: detect(row.text).upper(), axis=1)
+        data["country"] = data.progress_apply(lambda row: detect(row.text).upper(), axis=1)
 
     ### add industry codes ###
     codes = pd.read_csv(INDUSTRY_CODES_PATH + ".csv")
-    data[CLASS_COL_LABEL] = data.apply(
+    data[CLASS_COL_LABEL] = data.progress_apply(
         lambda row: list(codes[codes["industry"] == row[CLASS_COL]].industry_label)[0],
         axis=1,
     )
@@ -179,7 +195,7 @@ def main(args):
     if args.clean_boilerplate:
         logging.info("Cleaning HTML/XHTML/XML boilerplate...")
         HTML_COL = "chtml"
-        data[HTML_COL] = data.apply(
+        data[HTML_COL] = data.progress_apply(
             lambda row: clean_boilerplate(row.html, row.url), axis=1
         )
 
@@ -190,37 +206,37 @@ def main(args):
 
     ### extract meta element ###
     logging.info("Extract informations from <meta> elements.")
-    data["<meta>_title"] = data.apply(
+    data["<meta>_title"] = data.progress_apply(
         lambda row: extract_meta_informations(row.html, "title"),
         axis=1,
     )
-    data["<meta>_keywords"] = data.apply(
+    data["<meta>_keywords"] = data.progress_apply(
         lambda row: extract_meta_informations(row.html, "keywords"),
         axis=1,
     )
-    data["<meta>_description"] = data.apply(
+    data["<meta>_description"] = data.progress_apply(
         lambda row: extract_meta_informations(row.html, "description"),
         axis=1,
     )
     ### remove meta title from text ###
-    data["text"] = data.apply(lambda row: row.text.replace(row["<meta>_title"], ""), axis=1,)
+    data["text"] = data.progress_apply(lambda row: row.text.replace(row["<meta>_title"], ""), axis=1,)
 
     ### extract more element content ###
     logging.info("Extract infos from other elements.")
-    data["<title>"] = data.apply(lambda row: extract_tagtexts(row[HTML_COL], "title"), axis=1)
-    data["<h1>"] = data.apply(lambda row: extract_tagtexts(row[HTML_COL], "h1"), axis=1)
-    data["<h2>"] = data.apply(lambda row: extract_tagtexts(row[HTML_COL], "h2"), axis=1)
-    data["<h3>"] = data.apply(lambda row: extract_tagtexts(row[HTML_COL], "h3"), axis=1)
-    data["<h4>"] = data.apply(lambda row: extract_tagtexts(row[HTML_COL], "h4"), axis=1)
-    data["<h5>"] = data.apply(lambda row: extract_tagtexts(row[HTML_COL], "h5"), axis=1)
-    data["<h6>"] = data.apply(lambda row: extract_tagtexts(row[HTML_COL], "h6"), axis=1)
-    data["<b>"] = data.apply(lambda row: extract_tagtexts(row[HTML_COL], "b"), axis=1)
-    data["<strong>"] = data.apply(lambda row: extract_tagtexts(row[HTML_COL], "strong"), axis=1)
-    data["<em>"] = data.apply(lambda row: extract_tagtexts(row[HTML_COL], "em"), axis=1)
-    data["<i>"] = data.apply(lambda row: extract_tagtexts(row[HTML_COL], "i"), axis=1)
-    data["<p>"] = data.apply(lambda row: extract_tagtexts(row[HTML_COL], "p"), axis=1)
-    data["<a>"] = data.apply(lambda row: extract_tagtexts(row[HTML_COL], "a"), axis=1)
-    data["<li>"] = data.apply(lambda row: extract_tagtexts(row[HTML_COL], "li"), axis=1)
+    data["<title>"] = data.progress_apply(lambda row: extract_tagtexts(row[HTML_COL], "title"), axis=1)
+    data["<h1>"] = data.progress_apply(lambda row: extract_tagtexts(row[HTML_COL], "h1"), axis=1)
+    data["<h2>"] = data.progress_apply(lambda row: extract_tagtexts(row[HTML_COL], "h2"), axis=1)
+    data["<h3>"] = data.progress_apply(lambda row: extract_tagtexts(row[HTML_COL], "h3"), axis=1)
+    data["<h4>"] = data.progress_apply(lambda row: extract_tagtexts(row[HTML_COL], "h4"), axis=1)
+    data["<h5>"] = data.progress_apply(lambda row: extract_tagtexts(row[HTML_COL], "h5"), axis=1)
+    data["<h6>"] = data.progress_apply(lambda row: extract_tagtexts(row[HTML_COL], "h6"), axis=1)
+    data["<b>"] = data.progress_apply(lambda row: extract_tagtexts(row[HTML_COL], "b"), axis=1)
+    data["<strong>"] = data.progress_apply(lambda row: extract_tagtexts(row[HTML_COL], "strong"), axis=1)
+    data["<em>"] = data.progress_apply(lambda row: extract_tagtexts(row[HTML_COL], "em"), axis=1)
+    data["<i>"] = data.progress_apply(lambda row: extract_tagtexts(row[HTML_COL], "i"), axis=1)
+    data["<p>"] = data.progress_apply(lambda row: extract_tagtexts(row[HTML_COL], "p"), axis=1)
+    data["<a>"] = data.progress_apply(lambda row: extract_tagtexts(row[HTML_COL], "a"), axis=1)
+    data["<li>"] = data.progress_apply(lambda row: extract_tagtexts(row[HTML_COL], "li"), axis=1)
 
 
     ### remove useless columns ###
@@ -268,7 +284,7 @@ def main(args):
 
     if KEEP_HTML_COL:
         columns.append("html")
-    
+
     data = data.reindex(columns=columns)
 
     logging.info("Splitting data.")
@@ -292,11 +308,33 @@ def main(args):
         train, test = train_test_split(
             data,
             test_size=TEST_SIZE,
-            stratify=data[CLASS_COL],
+            #stratify=data[CLASS_COL],
             random_state=42,
         )
 
     test_urls = ",".join(test.url.tolist())
+
+    ### use pos tagging ###
+    if POS_TAGGING:
+        logging.info("Extracting nouns from text columns.")
+        train["text"] = train.progress_apply(lambda row: filter_nouns(row["text"]), axis=1)
+        train["<meta>_title"] = train.progress_apply(lambda row: filter_nouns(row["<meta>_title"]), axis=1)
+        train["<meta>_keywords"] = train.progress_apply(lambda row: filter_nouns(row["<meta>_keywords"] ), axis=1)
+        train["<meta>_description"] = train.progress_apply(lambda row: filter_nouns(row["<meta>_description"]), axis=1)
+        train["<title>"] = train.progress_apply(lambda row: filter_nouns(row["<title>"] ), axis=1)
+        train["<h1>"] = train.progress_apply(lambda row: filter_nouns(row["<h1>"]), axis=1)
+        train["<h2>"] = train.progress_apply(lambda row: filter_nouns(row["<h2>"]), axis=1)
+        train["<h3>"] = train.progress_apply(lambda row: filter_nouns(row["<h3>"]), axis=1)
+        train["<h4>"] = train.progress_apply(lambda row: filter_nouns(row["<h4>"]), axis=1)
+        train["<h5>"] = train.progress_apply(lambda row: filter_nouns(row["<h5>"]), axis=1)
+        train["<h6>"] = train.progress_apply(lambda row: filter_nouns(row["<h6>"]), axis=1)
+        train["<b>"] = train.progress_apply(lambda row: filter_nouns(row["<b>"]), axis=1)
+        train["<strong>"] = train.progress_apply(lambda row: filter_nouns(row["<strong>"]), axis=1)
+        train["<em>"] = train.progress_apply(lambda row: filter_nouns(row["<em>"] ), axis=1)
+        train["<i>"] = train.progress_apply(lambda row: filter_nouns(row["<i>"]), axis=1)
+        train["<p>"] = train.progress_apply(lambda row: filter_nouns(row["<p>"]), axis=1)
+        train["<a>"] = train.progress_apply(lambda row: filter_nouns(row["<a>"]), axis=1)
+        train["<li>"] = train.progress_apply(lambda row: filter_nouns(row["<li>"]), axis=1)
 
     ### save to csv ###
     logging.info("Saving data.")

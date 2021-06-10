@@ -108,8 +108,33 @@
             "<a>",
             "<li>"
         ],
-        "info": "Plain text + title + h1-h3 + b + strong + em + i + p + a + li (see ÖZEL, 'A web page classification system based on a genetic algorithm using tagged-terms as features')"
+        "info": "Title + h1-h3 + b + strong + em + i + p + a + li (see ÖZEL, 'A web page classification system based on a genetic algorithm using tagged-terms as features')"
     },
-    "4" : "TODO; vielleicht alle hervorhebe elemente?"
+    "4" : {
+        "name": "text_formatting",
+        "cols": [
+            "url", 
+            "group_representative_label", 
+            "text",
+            "<b>",
+            "<strong>",
+            "<em>",
+            "<i>"
+        ],
+        "info": "Plain text + Text Formatting elements"
+    },
+    "401" : {
+        "name": "text_formatting_only_elements",
+        "cols": [
+            "url", 
+            "group_representative_label", 
+            "text",
+            "<b>",
+            "<strong>",
+            "<em>",
+            "<i>"
+        ],
+        "info": "Text Formatting elements"
+    }
 
 }

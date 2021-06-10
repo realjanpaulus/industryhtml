@@ -3,12 +3,36 @@ from typing import Dict, List, Optional, Tuple, Union
 from unicodedata import normalize
 
 import lxml
-from lxml.cssselect import CSSSelector
 from lxml.html.clean import Cleaner
+from lxml.cssselect import CSSSelector
 from lxml import html, etree
 import numpy as np
 import pandas as pd
 
+import syntok.segmenter as segmenter
+from flair.data import Sentence
+from flair.models import SequenceTagger
+
+import logging
+logging.getLogger("flair").setLevel(logging.ERROR)
+
+try:
+    TAGGER = SequenceTagger.load("pos-multi-fast")
+    TOKEN_PATTERN = re.compile(r"\w+")
+except:
+    print("Loading of Sequence Tagger Model failed!")
+
+def filter_nouns(text: str):
+    tokens = TOKEN_PATTERN.findall(text)
+    sentence = Sentence(tokens, use_tokenizer=False)
+    TAGGER.predict(sentence)
+    return " ".join(filter_tokens(sentence))
+    
+def filter_tokens(sentence: Sentence) -> List[str]:
+    nouns = [token.text for token in sentence if token.get_tag("upos").value == "NOUN"]
+    return [
+        token.lower() for token in nouns if len(token) > 1 and not any(c.isdigit() for c in token)
+    ]
 
 
 # ================ #

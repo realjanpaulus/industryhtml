@@ -38,7 +38,7 @@ class DataFrameColumnExtracter(TransformerMixin):
 
     def transform(self, X, y=None):
         return X[self.column]
-
+        
 
 class FNPipeline(Pipeline):
     def get_feature_names(self):
@@ -303,8 +303,6 @@ def get_experiment_pipeline(
     return pipe
 
 
-
-
 def parse_arguments():
     """ Initialize argument parser and return arguments."""
     parser = argparse.ArgumentParser(
@@ -339,6 +337,12 @@ def parse_arguments():
         type=int,
         default=1,
         help="Indicates the number of processors used for computation (default: 1).",
+    )
+    parser.add_argument(
+        "--pos_tagging",
+        "-pt",
+        action="store_true",
+        help="Extracts nouns from text."
     )
     parser.add_argument(
         "--specific_country",
@@ -400,14 +404,18 @@ def main(args):
     if len(args.specific_country) >= 1:
         LANG = "_" + args.specific_country
 
+    POS_NAME = ""
+    if args.pos_tagging:
+        POS_NAME = "p"
+
     NROWS = None
     if args.data_shortened:
         NROWS = args.data_shortened
 
     ### Global variables ###
     DATA_DIR_PATH = args.path
-    TRAIN_PATH_CSV = DATA_DIR_PATH + CLEAN + "train" + LANG + ".csv"
-    TEST_PATH_CSV = DATA_DIR_PATH + CLEAN + "test" + LANG + ".csv"
+    TRAIN_PATH_CSV = DATA_DIR_PATH + CLEAN + POS_NAME + "train" + LANG + ".csv"
+    TEST_PATH_CSV = DATA_DIR_PATH + CLEAN + POS_NAME + "test" + LANG + ".csv"
 
     TEXT_COL = args.text_col
     CLASS_COL = "group_representative_label"
@@ -504,11 +512,14 @@ def main(args):
 
         ### Confusion matrix handling ###
         logging.info("Computing the Confusion Matrix.")
-        cm = confusion_matrix(y_test, y_pred)
-        cm_df = pd.DataFrame(
-            cm, index=np.unique(y_test_labels), columns=np.unique(y_train_labels)
-        )
-        cm_df.to_csv(f"{RESULTS_PATH}/cm_{OUTPUT_NAME}.csv")
+        try:
+            cm = confusion_matrix(y_test, y_pred)
+            cm_df = pd.DataFrame(
+                cm, index=np.unique(y_test_labels), columns=np.unique(y_train_labels)
+            )
+            cm_df.to_csv(f"{RESULTS_PATH}/cm_{OUTPUT_NAME}.csv")
+        except:
+            logging.warning("Confusion Matrix couldn't be created!")
 
         ### Feature importance ###
         logging.info("Computing the Feature Importance.")
