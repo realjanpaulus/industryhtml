@@ -197,74 +197,10 @@ def main(args):
             lambda row: clean_boilerplate(row.html, row.url), axis=1
         )
 
-    # ============================== #
-    # Add element content as columns #
-    # ============================== #
-
-    ### extract meta element ###
-    logging.info("Extract informations from <meta> elements.")
-    data["<meta>_title"] = data.progress_apply(
-        lambda row: extract_meta_informations(row.html, "title"),
-        axis=1,
-    )
-    data["<meta>_keywords"] = data.progress_apply(
-        lambda row: extract_meta_informations(row.html, "keywords"),
-        axis=1,
-    )
-    data["<meta>_description"] = data.progress_apply(
-        lambda row: extract_meta_informations(row.html, "description"),
-        axis=1,
-    )
-    ### remove meta title from text ###
-    data["text"] = data.progress_apply(
-        lambda row: row.text.replace(row["<meta>_title"], ""),
-        axis=1,
-    )
+    
 
     ### extract more element content ###
     logging.info("Extract infos from other elements.")
-    data["<title>"] = data.progress_apply(
-        lambda row: extract_tagtexts(row[HTML_COL], "title"), axis=1
-    )
-    data["<h1>"] = data.progress_apply(
-        lambda row: extract_tagtexts(row[HTML_COL], "h1"), axis=1
-    )
-    data["<h2>"] = data.progress_apply(
-        lambda row: extract_tagtexts(row[HTML_COL], "h2"), axis=1
-    )
-    data["<h3>"] = data.progress_apply(
-        lambda row: extract_tagtexts(row[HTML_COL], "h3"), axis=1
-    )
-    data["<h4>"] = data.progress_apply(
-        lambda row: extract_tagtexts(row[HTML_COL], "h4"), axis=1
-    )
-    data["<h5>"] = data.progress_apply(
-        lambda row: extract_tagtexts(row[HTML_COL], "h5"), axis=1
-    )
-    data["<h6>"] = data.progress_apply(
-        lambda row: extract_tagtexts(row[HTML_COL], "h6"), axis=1
-    )
-    data["<b>"] = data.progress_apply(
-        lambda row: extract_tagtexts(row[HTML_COL], "b"), axis=1
-    )
-    data["<strong>"] = data.progress_apply(
-        lambda row: extract_tagtexts(row[HTML_COL], "strong"), axis=1
-    )
-    data["<em>"] = data.progress_apply(
-        lambda row: extract_tagtexts(row[HTML_COL], "em"), axis=1
-    )
-    data["<i>"] = data.progress_apply(
-        lambda row: extract_tagtexts(row[HTML_COL], "i"), axis=1
-    )
-    data["<p>"] = data.progress_apply(
-        lambda row: extract_tagtexts(row[HTML_COL], "p"), axis=1
-    )
-    data["<a>"] = data.progress_apply(
-        lambda row: extract_tagtexts(row[HTML_COL], "a"), axis=1
-    )
-    data["<li>"] = data.progress_apply(
-        lambda row: extract_tagtexts(row[HTML_COL], "li"), axis=1
-    )
     data["<div>"] = data.progress_apply(
         lambda row: extract_tagtexts(row[HTML_COL], "div", no_inner=True), axis=1
     )
@@ -291,23 +227,6 @@ def main(args):
         "group_representative_label",
         "text",
         HTML_COL,
-        "<meta>_title",
-        "<meta>_keywords",
-        "<meta>_description",
-        "<title>",
-        "<h1>",
-        "<h2>",
-        "<h3>",
-        "<h4>",
-        "<h5>",
-        "<h6>",
-        "<b>",
-        "<strong>",
-        "<em>",
-        "<i>",
-        "<p>",
-        "<a>",
-        "<li>",
         "<div>",
     ]
     if not args.ignore_country:
@@ -353,60 +272,6 @@ def main(args):
 
         logging.getLogger("flair").setLevel(logging.ERROR)
 
-        train["text"] = train.progress_apply(
-            lambda row: filter_nouns(row["text"]), axis=1
-        )
-        train["<meta>_title"] = train.progress_apply(
-            lambda row: filter_nouns(row["<meta>_title"]), axis=1
-        )
-        train["<meta>_keywords"] = train.progress_apply(
-            lambda row: filter_nouns(row["<meta>_keywords"]), axis=1
-        )
-        train["<meta>_description"] = train.progress_apply(
-            lambda row: filter_nouns(row["<meta>_description"]), axis=1
-        )
-        train["<title>"] = train.progress_apply(
-            lambda row: filter_nouns(row["<title>"]), axis=1
-        )
-        train["<h1>"] = train.progress_apply(
-            lambda row: filter_nouns(row["<h1>"]), axis=1
-        )
-        train["<h2>"] = train.progress_apply(
-            lambda row: filter_nouns(row["<h2>"]), axis=1
-        )
-        train["<h3>"] = train.progress_apply(
-            lambda row: filter_nouns(row["<h3>"]), axis=1
-        )
-        train["<h4>"] = train.progress_apply(
-            lambda row: filter_nouns(row["<h4>"]), axis=1
-        )
-        train["<h5>"] = train.progress_apply(
-            lambda row: filter_nouns(row["<h5>"]), axis=1
-        )
-        train["<h6>"] = train.progress_apply(
-            lambda row: filter_nouns(row["<h6>"]), axis=1
-        )
-        train["<b>"] = train.progress_apply(
-            lambda row: filter_nouns(row["<b>"]), axis=1
-        )
-        train["<strong>"] = train.progress_apply(
-            lambda row: filter_nouns(row["<strong>"]), axis=1
-        )
-        train["<em>"] = train.progress_apply(
-            lambda row: filter_nouns(row["<em>"]), axis=1
-        )
-        train["<i>"] = train.progress_apply(
-            lambda row: filter_nouns(row["<i>"]), axis=1
-        )
-        train["<p>"] = train.progress_apply(
-            lambda row: filter_nouns(row["<p>"]), axis=1
-        )
-        train["<a>"] = train.progress_apply(
-            lambda row: filter_nouns(row["<a>"]), axis=1
-        )
-        train["<li>"] = train.progress_apply(
-            lambda row: filter_nouns(row["<li>"]), axis=1
-        )
         train["<div>"] = train.progress_apply(
             lambda row: filter_nouns(row["<div>"]), axis=1
         )

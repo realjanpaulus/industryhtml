@@ -71,6 +71,10 @@ def get_experiment_pipeline(
             ("extract_b", DataFrameColumnExtracter("<b>")),
             ("b_vect", vectorizer),
         ],
+        "div_text": [
+            ("extract_div", DataFrameColumnExtracter("<div>")),
+            ("div_vect", vectorizer),
+        ],
         "em_text": [
             ("extract_em", DataFrameColumnExtracter("<em>")),
             ("em_vect", vectorizer),
@@ -344,6 +348,8 @@ def get_experiment_pipeline(
                         [
                             ("plain", FNPipeline(texts["plain_text"])),
                             ("a", FNPipeline(texts["a_text"])),
+                            ("li", FNPipeline(texts["li_text"])),
+                            ("p", FNPipeline(texts["p_text"])),
                         ],
                         n_jobs=n_jobs,
                     ),
@@ -359,6 +365,8 @@ def get_experiment_pipeline(
                     FeatureUnion(
                         [
                             ("a", FNPipeline(texts["a_text"])),
+                            ("li", FNPipeline(texts["li_text"])),
+                            ("p", FNPipeline(texts["p_text"])),
                         ],
                         n_jobs=n_jobs,
                     ),
@@ -375,8 +383,25 @@ def get_experiment_pipeline(
                         [
                             ("plain", FNPipeline(texts["plain_text"])),
                             ("a", FNPipeline(texts["a_text"])),
+                            ("b", FNPipeline(texts["b_text"])),
+                            ("em", FNPipeline(texts["em_text"])),
+                            ("h1", FNPipeline(texts["h1_text"])),
+                            ("h2", FNPipeline(texts["h2_text"])),
+                            ("h3", FNPipeline(texts["h3_text"])),
+                            ("h4", FNPipeline(texts["h4_text"])),
+                            ("h5", FNPipeline(texts["h5_text"])),
+                            ("h6", FNPipeline(texts["h6_text"])),
+                            ("i", FNPipeline(texts["i_text"])),
                             ("li", FNPipeline(texts["li_text"])),
+                            ("meta_title", FNPipeline(texts["meta_title_text"])),
+                            ("meta_keywords", FNPipeline(texts["meta_keywords_text"])),
+                            (
+                                "meta_description",
+                                FNPipeline(texts["meta_description_text"]),
+                            ),
                             ("p", FNPipeline(texts["p_text"])),
+                            ("strong", FNPipeline(texts["strong_text"])),
+                            ("title", FNPipeline(texts["title_text"])),
                         ],
                         n_jobs=n_jobs,
                     ),
@@ -392,8 +417,127 @@ def get_experiment_pipeline(
                     FeatureUnion(
                         [
                             ("a", FNPipeline(texts["a_text"])),
+                            ("b", FNPipeline(texts["b_text"])),
+                            ("em", FNPipeline(texts["em_text"])),
+                            ("h1", FNPipeline(texts["h1_text"])),
+                            ("h2", FNPipeline(texts["h2_text"])),
+                            ("h3", FNPipeline(texts["h3_text"])),
+                            ("h4", FNPipeline(texts["h4_text"])),
+                            ("h5", FNPipeline(texts["h5_text"])),
+                            ("h6", FNPipeline(texts["h6_text"])),
+                            ("i", FNPipeline(texts["i_text"])),
                             ("li", FNPipeline(texts["li_text"])),
+                            ("meta_title", FNPipeline(texts["meta_title_text"])),
+                            ("meta_keywords", FNPipeline(texts["meta_keywords_text"])),
+                            (
+                                "meta_description",
+                                FNPipeline(texts["meta_description_text"]),
+                            ),
                             ("p", FNPipeline(texts["p_text"])),
+                            ("strong", FNPipeline(texts["strong_text"])),
+                            ("title", FNPipeline(texts["title_text"])),
+                        ],
+                        n_jobs=n_jobs,
+                    ),
+                ),
+                model,
+            ]
+        )
+    elif n == 7:
+        pipe = Pipeline(
+            [
+                (
+                    "features",
+                    FeatureUnion(
+                        [
+                            ("plain", FNPipeline(texts["plain_text"])),
+                            ("a", FNPipeline(texts["a_text"])),
+                            ("b", FNPipeline(texts["b_text"])),
+                            ("div", FNPipeline(texts["div_text"])),
+                            ("em", FNPipeline(texts["em_text"])),
+                            ("h1", FNPipeline(texts["h1_text"])),
+                            ("h2", FNPipeline(texts["h2_text"])),
+                            ("h3", FNPipeline(texts["h3_text"])),
+                            ("h4", FNPipeline(texts["h4_text"])),
+                            ("h5", FNPipeline(texts["h5_text"])),
+                            ("h6", FNPipeline(texts["h6_text"])),
+                            ("i", FNPipeline(texts["i_text"])),
+                            ("li", FNPipeline(texts["li_text"])),
+                            ("meta_title", FNPipeline(texts["meta_title_text"])),
+                            ("meta_keywords", FNPipeline(texts["meta_keywords_text"])),
+                            (
+                                "meta_description",
+                                FNPipeline(texts["meta_description_text"]),
+                            ),
+                            ("p", FNPipeline(texts["p_text"])),
+                            ("strong", FNPipeline(texts["strong_text"])),
+                            ("title", FNPipeline(texts["title_text"])),
+                        ],
+                        n_jobs=n_jobs,
+                    ),
+                ),
+                model,
+            ]
+        )
+    elif n == 701:
+        pipe = Pipeline(
+            [
+                (
+                    "features",
+                    FeatureUnion(
+                        [
+                            ("a", FNPipeline(texts["a_text"])),
+                            ("b", FNPipeline(texts["b_text"])),
+                            ("div", FNPipeline(texts["div_text"])),
+                            ("em", FNPipeline(texts["em_text"])),
+                            ("h1", FNPipeline(texts["h1_text"])),
+                            ("h2", FNPipeline(texts["h2_text"])),
+                            ("h3", FNPipeline(texts["h3_text"])),
+                            ("h4", FNPipeline(texts["h4_text"])),
+                            ("h5", FNPipeline(texts["h5_text"])),
+                            ("h6", FNPipeline(texts["h6_text"])),
+                            ("i", FNPipeline(texts["i_text"])),
+                            ("li", FNPipeline(texts["li_text"])),
+                            ("meta_title", FNPipeline(texts["meta_title_text"])),
+                            ("meta_keywords", FNPipeline(texts["meta_keywords_text"])),
+                            (
+                                "meta_description",
+                                FNPipeline(texts["meta_description_text"]),
+                            ),
+                            ("p", FNPipeline(texts["p_text"])),
+                            ("strong", FNPipeline(texts["strong_text"])),
+                            ("title", FNPipeline(texts["title_text"])),
+                        ],
+                        n_jobs=n_jobs,
+                    ),
+                ),
+                model,
+            ]
+        )
+    elif n == 8:
+        pipe = Pipeline(
+            [
+                (
+                    "features",
+                    FeatureUnion(
+                        [
+                            ("plain", FNPipeline(texts["plain_text"])),
+                            ("div", FNPipeline(texts["div_text"])),
+                        ],
+                        n_jobs=n_jobs,
+                    ),
+                ),
+                model,
+            ]
+        )
+    elif n == 801:
+        pipe = Pipeline(
+            [
+                (
+                    "features",
+                    FeatureUnion(
+                        [
+                            ("div", FNPipeline(texts["div_text"])),
                         ],
                         n_jobs=n_jobs,
                     ),

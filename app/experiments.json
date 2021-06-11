@@ -137,27 +137,7 @@
         "info": "Text Formatting elements"
     },
     "5" : {
-        "name": "5_links",
-        "cols": [
-            "url",
-            "group_representative_label",
-            "text",
-            "<a>"
-        ],
-        "info": "Plain text + links"
-    },
-    "501" : {
-        "name": "501_links_only_elements",
-        "cols": [
-            "url",
-            "group_representative_label",
-            "text",
-            "<a>"
-        ],
-        "info": "Plain text + links"
-    },
-    "6" : {
-        "name": "6_structure",
+        "name": "5_structure",
         "cols": [
             "url",
             "group_representative_label",
@@ -168,8 +148,8 @@
         ],
         "info": "Plain text + structure elements"
     },
-    "601" : {
-        "name": "6_structure_only_elements",
+    "501" : {
+        "name": "5_structure_only_elements",
         "cols": [
             "url",
             "group_representative_label",
@@ -179,5 +159,131 @@
             "<p>"
         ],
         "info": "Structure elements"
+    },
+    "6" : {
+        "name": "6_all_elements_without_div",
+        "cols": [
+            "url",
+            "group_representative_label",
+            "text",
+            "<a>",
+            "<b>",
+            "<em>",
+            "<h1>",
+            "<h2>",
+            "<h3>",
+            "<h4>",
+            "<h5>",
+            "<h6>",
+            "<i>",
+            "<li>",
+            "<meta>_title",
+            "<meta>_keywords",
+            "<meta>_description",
+            "<p>",
+            "<strong>",
+            "<title>"
+        ],
+        "info": "Plain text + all elements without <div>."
+    },
+    "601" : {
+        "name": "6_all_elements_without_div_only_elements",
+        "cols": [
+            "url",
+            "group_representative_label",
+            "text",
+            "<a>",
+            "<b>",
+            "<em>",
+            "<h1>",
+            "<h2>",
+            "<h3>",
+            "<h4>",
+            "<h5>",
+            "<h6>",
+            "<i>",
+            "<li>",
+            "<meta>_title",
+            "<meta>_keywords",
+            "<meta>_description",
+            "<p>",
+            "<strong>",
+            "<title>"
+        ],
+        "info": "All elements without <div>."
+    },
+    "7" : {
+        "name": "7_all_elements_with_div",
+        "cols": [
+            "url",
+            "group_representative_label",
+            "text",
+            "<a>",
+            "<b>",
+            "<div>",
+            "<em>",
+            "<h1>",
+            "<h2>",
+            "<h3>",
+            "<h4>",
+            "<h5>",
+            "<h6>",
+            "<i>",
+            "<li>",
+            "<meta>_title",
+            "<meta>_keywords",
+            "<meta>_description",
+            "<p>",
+            "<strong>",
+            "<title>"
+        ],
+        "info": "Plain text + all elements with <div>."
+    },
+    "701" : {
+        "name": "7_all_elements_with_div_only_elements",
+        "cols": [
+            "url",
+            "group_representative_label",
+            "text",
+            "<a>",
+            "<b>",
+            "<div>",
+            "<em>",
+            "<h1>",
+            "<h2>",
+            "<h3>",
+            "<h4>",
+            "<h5>",
+            "<h6>",
+            "<i>",
+            "<li>",
+            "<meta>_title",
+            "<meta>_keywords",
+            "<meta>_description",
+            "<p>",
+            "<strong>",
+            "<title>"
+        ],
+        "info": "All elements with <div>."
+    },
+    "8" : {
+        "name": "8_divs",
+        "cols": [
+            "url",
+            "group_representative_label",
+            "text",
+            "<div>"
+        ],
+        "info": "Plain text + <div> elements."
+    },
+    "801" : {
+        "name": "8_divs_only_elements",
+        "cols": [
+            "url",
+            "group_representative_label",
+            "text",
+            "<div>"
+        ],
+        "info": "<div> elements."
     }
 }
