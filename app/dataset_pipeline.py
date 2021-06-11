@@ -236,7 +236,7 @@ def main(args):
     data["<p>"] = data.progress_apply(lambda row: extract_tagtexts(row[HTML_COL], "p"), axis=1)
     data["<a>"] = data.progress_apply(lambda row: extract_tagtexts(row[HTML_COL], "a"), axis=1)
     data["<li>"] = data.progress_apply(lambda row: extract_tagtexts(row[HTML_COL], "li"), axis=1)
-
+    data["<div>"] = data.progress_apply(lambda row: extract_tagtexts(row[HTML_COL], "div", no_inner=True), axis=1)
 
     ### remove useless columns ###
     possible_columns = [
@@ -276,7 +276,8 @@ def main(args):
         "<i>",
         "<p>",
         "<a>",
-        "<li>"
+        "<li>",
+        "<div>"
     ]
     if not args.ignore_country:
         columns.append("country")
@@ -338,6 +339,7 @@ def main(args):
         train["<p>"] = train.progress_apply(lambda row: filter_nouns(row["<p>"]), axis=1)
         train["<a>"] = train.progress_apply(lambda row: filter_nouns(row["<a>"]), axis=1)
         train["<li>"] = train.progress_apply(lambda row: filter_nouns(row["<li>"]), axis=1)
+        train["<div>"] = train.progress_apply(lambda row: filter_nouns(row["<div>"]), axis=1)
 
     ### save to csv ###
     logging.info("Saving data.")
