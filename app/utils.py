@@ -6,6 +6,7 @@ import lxml
 from lxml.html.clean import Cleaner
 from lxml.cssselect import CSSSelector
 from lxml import html, etree
+from lxml.html import soupparser
 import numpy as np
 import pandas as pd
 
@@ -202,18 +203,22 @@ def extract_meta_informations(string: str, meta_type: str) -> list:
     results = [x for x in results if x is not None]
     return " ".join(list(set(results)))
 
-def extract_tagtexts(string: str, tag: str):
+def extract_tagtexts(string: str, tag: str, no_inner: bool = False):
     """ Extract text content from all elements inside given tag."""
-    try:
-        tree = extract_tree(string, "html")
-        select = CSSSelector(tag, translator="html")
-    except:
-        tree = extract_tree(string, "xml")
-        select = CSSSelector(tag, translator="xml")
+    if no_inner:
+        soup = soupparser.fromstring(string)
+        return " ".join(soup.xpath(f"//{tag}/text()"))
+    else:
+        try:
+            tree = extract_tree(string, "html")
+            select = CSSSelector(tag, translator="html")
+        except:
+            tree = extract_tree(string, "xml")
+            select = CSSSelector(tag, translator="xml")
 
-    results = [element.text_content() for element in select(tree)]
-    results = [x for x in results if x is not None]
-    return " ".join(list(set(results)))
+        results = [element.text_content() for element in select(tree)]
+        results = [x for x in results if x is not None]
+        return " ".join(list(set(results)))
 
 def extract_tree(string: str, markup_type: str) -> lxml.etree._Element:
     """ Extracts tree from string.
