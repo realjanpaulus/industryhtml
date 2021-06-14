@@ -149,7 +149,7 @@
         "info": "Plain text + structure elements"
     },
     "501" : {
-        "name": "5_structure_only_elements",
+        "name": "501_structure_only_elements",
         "cols": [
             "url",
             "group_representative_label",
@@ -187,7 +187,7 @@
         "info": "Plain text + all elements without <div>."
     },
     "601" : {
-        "name": "6_all_elements_without_div_only_elements",
+        "name": "601_all_elements_without_div_only_elements",
         "cols": [
             "url",
             "group_representative_label",
@@ -240,7 +240,7 @@
         "info": "Plain text + all elements with <div>."
     },
     "701" : {
-        "name": "7_all_elements_with_div_only_elements",
+        "name": "701_all_elements_with_div_only_elements",
         "cols": [
             "url",
             "group_representative_label",
@@ -277,7 +277,7 @@
         "info": "Plain text + <div> elements."
     },
     "801" : {
-        "name": "8_divs_only_elements",
+        "name": "801_divs_only_elements",
         "cols": [
             "url",
             "group_representative_label",
