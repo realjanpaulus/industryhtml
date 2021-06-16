@@ -197,7 +197,7 @@ def main(args):
             lambda row: clean_boilerplate(row.html, row.url), axis=1
         )
 
-    
+
 
     ### extract more element content ###
     logging.info("Extract infos from other elements.")
@@ -272,9 +272,21 @@ def main(args):
 
         logging.getLogger("flair").setLevel(logging.ERROR)
 
-        train["<div>"] = train.progress_apply(
-            lambda row: filter_nouns(row["<div>"]), axis=1
-        )
+        # TODO: (22000, 23000),
+        l = [(23000, 24000), (24000, 25000), (25000, 26000), (26000, 27000), (27000, 28000),
+            (28000, 29000), (29000, 30000), (30000, 31000)]
+
+        for t in l:
+            print(t)
+            tmp_train = train.loc[t[0]:t[1],]
+            tmp_train["<div>"] = tmp_train.progress_apply(
+                    lambda row: filter_nouns(row["<div>"]), axis=1
+                )
+            if tmp_train.shape[0] == 0:
+                print("Fertig mit tmp")
+                break
+            else:
+                tmp_train.to_csv(f"tmp/tmp{str(t)}.csv", index=False)
 
     ### save to csv ###
     logging.info("Saving data.")

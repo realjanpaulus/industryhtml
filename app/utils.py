@@ -17,7 +17,7 @@ try:
     from flair.models import SequenceTagger
 
     import logging
-    logging.getLogger("flair").setLevel(logging.ERROR)
+    #logging.getLogger("flair").setLevel(logging.ERROR)
 
     TAGGER = SequenceTagger.load("pos-multi-fast")
     TOKEN_PATTERN = re.compile(r"\w+")
