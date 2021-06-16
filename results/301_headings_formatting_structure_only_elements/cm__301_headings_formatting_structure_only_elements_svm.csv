@@ -1,22 +1,22 @@
 ,Automotive,Construction,Consumer Goods,Financial Services,Human Resources,Information Technology and Services,Insurance,Legal Services,"Leisure, Travel & Tourism",Logistics and Supply Chain,Machinery,Management Consulting,Marketing and Advertising,Mechanical or Industrial Engineering,Media Production,Medical Practice,Real Estate,Recreational Facilities and Services,Renewables & Environment,Telecommunications,Wholesale
-Automotive,220,1,9,1,2,13,0,0,0,2,19,11,4,27,0,0,0,2,0,2,4
-Construction,1,259,20,2,1,24,0,0,1,2,22,12,9,18,0,2,4,0,4,2,3
-Consumer Goods,12,21,310,3,3,46,0,1,1,0,24,6,7,39,3,8,1,10,2,1,8
-Financial Services,8,4,3,319,1,33,10,1,1,1,1,17,1,2,1,4,2,1,0,1,1
-Human Resources,0,2,2,1,118,18,1,0,0,0,1,38,4,2,1,3,0,1,1,0,0
-Information Technology and Services,7,7,16,17,5,1270,0,3,2,5,11,68,31,15,25,9,3,4,1,6,0
-Insurance,1,1,1,16,0,10,85,0,0,0,0,6,0,2,1,1,1,0,0,0,0
-Legal Services,0,0,1,4,0,2,0,118,0,0,0,1,0,0,0,0,2,0,0,0,0
-"Leisure, Travel & Tourism",0,0,1,0,0,7,0,0,102,0,1,2,3,1,0,0,1,4,0,0,0
-Logistics and Supply Chain,5,2,4,0,0,13,0,0,0,97,4,5,0,8,1,3,0,0,1,1,3
-Machinery,9,21,12,0,0,28,0,0,0,3,270,8,5,121,0,6,2,3,3,2,12
-Management Consulting,3,16,8,9,24,124,3,5,0,2,5,408,25,6,8,10,4,1,2,3,1
-Marketing and Advertising,3,9,9,1,1,47,0,0,1,2,2,23,383,5,25,3,2,1,0,1,4
-Mechanical or Industrial Engineering,18,16,30,1,1,37,0,0,0,3,72,13,2,364,1,4,3,3,1,0,8
-Media Production,0,2,8,4,2,73,0,1,3,1,0,6,51,2,77,2,2,0,0,4,3
-Medical Practice,3,3,12,0,1,25,3,0,0,1,8,16,5,15,0,257,0,6,1,0,0
-Real Estate,0,21,3,8,0,11,2,0,0,2,1,3,4,3,0,0,178,0,0,0,0
-Recreational Facilities and Services,1,1,8,0,1,11,0,0,3,1,8,1,8,6,0,7,0,98,0,0,2
-Renewables & Environment,1,2,4,2,0,7,0,0,0,0,17,3,2,16,0,0,0,0,48,0,1
-Telecommunications,0,2,14,2,1,46,0,0,0,0,3,3,8,4,2,0,0,0,0,50,2
-Wholesale,6,3,34,1,0,9,0,0,0,1,25,6,5,10,1,6,1,6,0,0,118
+Automotive,202,4,9,3,1,14,0,0,1,2,24,11,4,24,3,3,1,3,1,1,6
+Construction,3,242,20,4,1,25,0,0,2,1,26,13,8,19,1,4,4,0,4,2,7
+Consumer Goods,15,20,289,3,1,43,0,1,1,0,32,8,9,34,5,12,0,11,4,2,16
+Financial Services,7,7,3,314,0,29,14,1,1,1,1,16,4,2,0,4,4,1,0,2,1
+Human Resources,0,1,2,1,119,16,1,0,0,0,1,38,4,2,4,1,0,1,1,0,1
+Information Technology and Services,9,7,23,19,4,1198,3,2,2,8,11,94,31,17,43,11,4,4,1,11,3
+Insurance,1,2,1,13,0,9,82,0,0,0,1,4,1,2,0,4,3,0,1,0,1
+Legal Services,0,0,3,4,0,4,0,114,0,0,1,1,0,0,0,0,1,0,0,0,0
+"Leisure, Travel & Tourism",0,1,2,0,1,4,0,0,101,0,1,2,3,1,0,0,1,5,0,0,0
+Logistics and Supply Chain,5,3,4,0,0,11,0,0,0,94,8,5,0,6,1,3,0,0,1,2,4
+Machinery,18,24,14,2,0,31,1,0,1,2,249,6,5,111,1,7,2,3,6,1,21
+Management Consulting,4,14,8,12,27,128,3,5,0,2,7,390,22,10,10,15,3,0,2,2,3
+Marketing and Advertising,3,10,7,1,1,42,0,0,1,2,2,23,390,3,27,2,1,2,0,2,3
+Mechanical or Industrial Engineering,22,21,33,3,1,39,0,0,0,3,81,11,1,329,1,6,3,4,1,1,17
+Media Production,2,0,9,4,2,71,0,1,3,1,0,8,46,1,80,2,4,0,0,4,3
+Medical Practice,2,6,12,0,1,25,3,0,1,1,10,13,5,16,1,247,2,7,1,0,3
+Real Estate,0,20,3,7,0,16,1,1,2,3,1,3,4,4,0,0,171,0,0,0,0
+Recreational Facilities and Services,3,2,13,0,1,8,0,0,2,0,10,0,10,6,3,7,0,86,0,1,4
+Renewables & Environment,4,4,8,3,0,7,0,0,0,0,12,4,1,15,0,0,0,0,44,0,1
+Telecommunications,1,2,11,1,1,42,0,0,0,0,6,6,9,5,1,0,0,0,1,49,2
+Wholesale,6,4,35,2,0,10,0,0,1,2,17,1,4,13,1,8,1,6,0,1,120

@@ -1,0 +1,17 @@
+python clf_pipeline.py -dc -nj 6 -e 0 -mf 10000;
+python clf_pipeline.py -dc -nj 6 -e 1 -mf 10000;
+python clf_pipeline.py -dc -nj 6 -e 101 -mf 10000;
+python clf_pipeline.py -dc -nj 6 -e 2 -mf 10000;
+python clf_pipeline.py -dc -nj 6 -e 201 -mf 10000;
+python clf_pipeline.py -dc -nj 6 -e 3 -mf 10000;
+python clf_pipeline.py -dc -nj 6 -e 301 -mf 10000;
+python clf_pipeline.py -dc -nj 6 -e 4 -mf 10000;
+python clf_pipeline.py -dc -nj 6 -e 401 -mf 10000;
+python clf_pipeline.py -dc -nj 6 -e 5 -mf 10000;
+python clf_pipeline.py -dc -nj 6 -e 501 -mf 10000;
+python clf_pipeline.py -dc -nj 6 -e 6 -mf 10000;
+python clf_pipeline.py -dc -nj 6 -e 601 -mf 10000;
+python clf_pipeline.py -dc -nj 6 -e 7 -mf 10000;
+python clf_pipeline.py -dc -nj 6 -e 701 -mf 10000;
+python clf_pipeline.py -dc -nj 6 -e 8 -mf 10000;
+python clf_pipeline.py -dc -nj 6 -e 801 -mf 10000;

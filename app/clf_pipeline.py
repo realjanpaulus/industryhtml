@@ -578,6 +578,13 @@ def parse_arguments():
         help="Indicates number of experiment.",
     )
     parser.add_argument(
+        "--max_features",
+        "-mf",
+        type=int,
+        default=None,
+        help="Indicates maximum of features for the vectorizer."
+    )
+    parser.add_argument(
         "--n_jobs",
         "-nj",
         type=int,
@@ -669,6 +676,8 @@ def main(args):
 
     N_JOBS = args.n_jobs
 
+    MAX_FEATURES = args.max_features
+
     ### LOGGER ###
     Path("logs").mkdir(parents=True, exist_ok=True)
     logging_filename = f"logs/clf_pipeline{LANG} ({START_DATE}).log"
@@ -732,7 +741,7 @@ def main(args):
         LOOP_TIME = time.time()
 
         OUTPUT_NAME = f"_{EXPERIMENT['name']}_{model_name}"
-        VECTORIZER = TfidfVectorizer(sublinear_tf=True)
+        VECTORIZER = TfidfVectorizer(sublinear_tf=True, max_features=MAX_FEATURES)
 
         ### Experiment setup ###
         pipe = get_experiment_pipeline(
