@@ -285,5 +285,127 @@
             "<div>"
         ],
         "info": "<div> elements."
+    },
+    "9": {
+        "name": "9_paragraph",
+        "cols": [
+            "url",
+            "group_representative_label",
+            "text",
+            "<p>"
+        ],
+        "info": "Plain text + <p> elements."
+    },
+    "901": {
+        "name": "901_paragraph_only_elements",
+        "cols": [
+            "url",
+            "group_representative_label",
+            "text",
+            "<p>"
+        ],
+        "info": "<p> elements."
+    },
+    "10": {
+        "name": "10_paragraph_metadescription",
+        "cols": [
+            "url",
+            "group_representative_label",
+            "text",
+            "<p>",
+            "<meta>_description"
+        ],
+        "info": "Plain text + <p> elements + <meta> description."
+    },
+    "1001": {
+        "name": "1001_paragraph_metadescription_only_elements",
+        "cols": [
+            "url",
+            "group_representative_label",
+            "text",
+            "<p>",
+            "<meta>_description"
+        ],
+        "info": "<p> elements + <meta> description"
+    },
+    "11": {
+        "name": "11_a_paragraph_metadescription",
+        "cols": [
+            "url",
+            "group_representative_label",
+            "text",
+            "<a>",
+            "<p>",
+            "<meta>_description"
+
+        ],
+        "info": "Plain text + <a> elements + <p> elements + <meta> description."
+    },
+    "1101": {
+        "name": "1101_a_paragraph_metadescription_only_elements",
+        "cols": [
+            "url",
+            "group_representative_label",
+            "text",
+            "<a>",
+            "<p>",
+            "<meta>_description"
+
+        ],
+        "info": "<a> elements + <p> elements + <meta> description."
+    },
+    "12": {
+        "name": "12_a_paragraph_metadescription_headings",
+        "cols": [
+            "url",
+            "group_representative_label",
+            "text",
+            "<a>",
+            "<p>",
+            "<meta>_description",
+            "<h1>",
+            "<h2>",
+            "<h3>",
+            "<h4>",
+            "<h5>"
+        ],
+        "info": "Plain text + <a> elements + <p> elements + <meta> description + headings."
+    },
+    "1201": {
+        "name": "1201_a_paragraph_metadescription_headings_only_elements",
+        "cols": [
+            "url",
+            "group_representative_label",
+            "text",
+            "<a>",
+            "<p>",
+            "<meta>_description",
+            "<h1>",
+            "<h2>",
+            "<h3>",
+            "<h4>",
+            "<h5>"
+        ],
+        "info": "<a> elements + <p> elements + <meta> description + headings."
+    },
+    "13": {
+        "name": "13_list",
+        "cols": [
+            "url",
+            "group_representative_label",
+            "text",
+            "<li>"
+        ],
+        "info": "Plain text + <li> elements ."
+    },
+    "1301": {
+        "name": "1301_list_only_elements",
+        "cols": [
+            "url",
+            "group_representative_label",
+            "text",
+            "<li>"
+        ],
+        "info": "<li> elements ."
     }
 }

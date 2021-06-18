@@ -1,0 +1,10 @@
+python clf_pipeline.py -dc -nj 6 -e 9 -pt;
+python clf_pipeline.py -dc -nj 6 -e 901 -pt;
+python clf_pipeline.py -dc -nj 6 -e 10 -pt;
+python clf_pipeline.py -dc -nj 6 -e 1001 -pt;
+python clf_pipeline.py -dc -nj 6 -e 11 -pt;
+python clf_pipeline.py -dc -nj 6 -e 1101 -pt;
+python clf_pipeline.py -dc -nj 6 -e 12 -pt;
+python clf_pipeline.py -dc -nj 6 -e 1201 -pt;
+python clf_pipeline.py -dc -nj 6 -e 13 -pt;
+python clf_pipeline.py -dc -nj 6 -e 1301 -pt;

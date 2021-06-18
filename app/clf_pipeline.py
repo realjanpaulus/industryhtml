@@ -140,7 +140,6 @@ def get_experiment_pipeline(
         ],
     }
 
-
     model = (model_name, model_obj)
 
     if n == 0:
@@ -545,8 +544,207 @@ def get_experiment_pipeline(
                 model,
             ]
         )
+    elif n == 9:
+        pipe = Pipeline(
+            [
+                (
+                    "features",
+                    FeatureUnion(
+                        [
+                            ("plain", FNPipeline(texts["plain_text"])),
+                            ("p", FNPipeline(texts["p_text"])),
+                        ],
+                        n_jobs=n_jobs,
+                    ),
+                ),
+                model,
+            ]
+        )
+    elif n == 901:
+        pipe = Pipeline(
+            [
+                (
+                    "features",
+                    FeatureUnion(
+                        [
+                            ("p", FNPipeline(texts["p_text"])),
+                        ],
+                        n_jobs=n_jobs,
+                    ),
+                ),
+                model,
+            ]
+        )
+    elif n == 10:
+        pipe = Pipeline(
+            [
+                (
+                    "features",
+                    FeatureUnion(
+                        [
+                            ("plain", FNPipeline(texts["plain_text"])),
+                            (
+                                "meta_description",
+                                FNPipeline(texts["meta_description_text"]),
+                            ),
+                            ("p", FNPipeline(texts["p_text"])),
+                        ],
+                        n_jobs=n_jobs,
+                    ),
+                ),
+                model,
+            ]
+        )
+    elif n == 1001:
+        pipe = Pipeline(
+            [
+                (
+                    "features",
+                    FeatureUnion(
+                        [
+                            (
+                                "meta_description",
+                                FNPipeline(texts["meta_description_text"]),
+                            ),
+                            ("p", FNPipeline(texts["p_text"])),
+                        ],
+                        n_jobs=n_jobs,
+                    ),
+                ),
+                model,
+            ]
+        )
+    elif n == 11:
+        pipe = Pipeline(
+            [
+                (
+                    "features",
+                    FeatureUnion(
+                        [
+                            ("plain", FNPipeline(texts["plain_text"])),
+                            ("a", FNPipeline(texts["a_text"])),
+                            (
+                                "meta_description",
+                                FNPipeline(texts["meta_description_text"]),
+                            ),
+                            ("p", FNPipeline(texts["p_text"])),
+                        ],
+                        n_jobs=n_jobs,
+                    ),
+                ),
+                model,
+            ]
+        )
+    elif n == 1101:
+        pipe = Pipeline(
+            [
+                (
+                    "features",
+                    FeatureUnion(
+                        [
+                            ("a", FNPipeline(texts["a_text"])),
+                            (
+                                "meta_description",
+                                FNPipeline(texts["meta_description_text"]),
+                            ),
+                            ("p", FNPipeline(texts["p_text"])),
+                        ],
+                        n_jobs=n_jobs,
+                    ),
+                ),
+                model,
+            ]
+        )
+    elif n == 12:
+        pipe = Pipeline(
+            [
+                (
+                    "features",
+                    FeatureUnion(
+                        [
+                            ("plain", FNPipeline(texts["plain_text"])),
+                            ("a", FNPipeline(texts["a_text"])),
+                            (
+                                "meta_description",
+                                FNPipeline(texts["meta_description_text"]),
+                            ),
+                            ("h1", FNPipeline(texts["h1_text"])),
+                            ("h2", FNPipeline(texts["h2_text"])),
+                            ("h3", FNPipeline(texts["h3_text"])),
+                            ("h4", FNPipeline(texts["h4_text"])),
+                            ("h5", FNPipeline(texts["h5_text"])),
+                            ("p", FNPipeline(texts["p_text"])),
+                        ],
+                        n_jobs=n_jobs,
+                    ),
+                ),
+                model,
+            ]
+        )
+    elif n == 1201:
+        pipe = Pipeline(
+            [
+                (
+                    "features",
+                    FeatureUnion(
+                        [
+                            ("plain", FNPipeline(texts["plain_text"])),
+                            ("a", FNPipeline(texts["a_text"])),
+                            (
+                                "meta_description",
+                                FNPipeline(texts["meta_description_text"]),
+                            ),
+                            ("h1", FNPipeline(texts["h1_text"])),
+                            ("h2", FNPipeline(texts["h2_text"])),
+                            ("h3", FNPipeline(texts["h3_text"])),
+                            ("h4", FNPipeline(texts["h4_text"])),
+                            ("h5", FNPipeline(texts["h5_text"])),
+                            ("p", FNPipeline(texts["p_text"])),
+                        ],
+                        n_jobs=n_jobs,
+                    ),
+                ),
+                model,
+            ]
+        )
+    elif n == 13:
+        pipe = Pipeline(
+            [
+                (
+                    "features",
+                    FeatureUnion(
+                        [
+                            ("plain", FNPipeline(texts["plain_text"])),
+                            ("li", FNPipeline(texts["li_text"])),
+            
+                        ],
+                        n_jobs=n_jobs,
+                    ),
+                ),
+                model,
+            ]
+        )
+    elif n == 1301:
+        pipe = Pipeline(
+            [
+                (
+                    "features",
+                    FeatureUnion(
+                        [
+                            ("li", FNPipeline(texts["li_text"])),
+            
+                        ],
+                        n_jobs=n_jobs,
+                    ),
+                ),
+                model,
+            ]
+        )
+
 
     return pipe
+
+
 
 
 def parse_arguments():
