@@ -52,7 +52,7 @@ def get_experiment_pipeline(
     model_name,
     model_obj,
     text_col,
-    vectorizer,
+    max_features,
     n_jobs,
 ):
     """ Get experiment pipeline by number."""
@@ -61,82 +61,82 @@ def get_experiment_pipeline(
     texts = {
         "plain_text": [
             ("extract_text", DataFrameColumnExtracter(text_col)),
-            ("plain_vect", vectorizer),
+            ("plain_vect", TfidfVectorizer(sublinear_tf=True, max_features=max_features)),
         ],
         "a_text": [
             ("extract_a", DataFrameColumnExtracter("<a>")),
-            ("a_vect", vectorizer),
+            ("a_vect", TfidfVectorizer(sublinear_tf=True, max_features=max_features)),
         ],
         "b_text": [
             ("extract_b", DataFrameColumnExtracter("<b>")),
-            ("b_vect", vectorizer),
+            ("b_vect", TfidfVectorizer(sublinear_tf=True, max_features=max_features)),
         ],
         "div_text": [
             ("extract_div", DataFrameColumnExtracter("<div>")),
-            ("div_vect", vectorizer),
+            ("div_vect", TfidfVectorizer(sublinear_tf=True, max_features=max_features)),
         ],
         "em_text": [
             ("extract_em", DataFrameColumnExtracter("<em>")),
-            ("em_vect", vectorizer),
+            ("em_vect", TfidfVectorizer(sublinear_tf=True, max_features=max_features)),
         ],
         "h1_text": [
             ("extract_h1", DataFrameColumnExtracter("<h1>")),
-            ("h1_vect", vectorizer),
+            ("h1_vect", TfidfVectorizer(sublinear_tf=True, max_features=max_features)),
         ],
         "h2_text": [
             ("extract_h2", DataFrameColumnExtracter("<h2>")),
-            ("h2_vect", vectorizer),
+            ("h2_vect", TfidfVectorizer(sublinear_tf=True, max_features=max_features)),
         ],
         "h3_text": [
             ("extract_h3", DataFrameColumnExtracter("<h3>")),
-            ("h3_vect", vectorizer),
+            ("h3_vect", TfidfVectorizer(sublinear_tf=True, max_features=max_features)),
         ],
         "h4_text": [
             ("extract_h4", DataFrameColumnExtracter("<h4>")),
-            ("h4_vect", vectorizer),
+            ("h4_vect", TfidfVectorizer(sublinear_tf=True, max_features=max_features)),
         ],
         "h5_text": [
             ("extract_h5", DataFrameColumnExtracter("<h5>")),
-            ("h5_vect", vectorizer),
+            ("h5_vect", TfidfVectorizer(sublinear_tf=True, max_features=max_features)),
         ],
         "h6_text": [
             ("extract_h6", DataFrameColumnExtracter("<h6>")),
-            ("h6_vect", vectorizer),
+            ("h6_vect", TfidfVectorizer(sublinear_tf=True, max_features=max_features)),
         ],
         "i_text": [
             ("extract_i", DataFrameColumnExtracter("<i>")),
-            ("i_vect", vectorizer),
+            ("i_vect", TfidfVectorizer(sublinear_tf=True, max_features=max_features)),
         ],
         "li_text": [
             ("extract_li", DataFrameColumnExtracter("<li>")),
-            ("li_vect", vectorizer),
+            ("li_vect", TfidfVectorizer(sublinear_tf=True, max_features=max_features)),
         ],
         "meta_description_text": [
             (
                 "extract_meta_description",
                 DataFrameColumnExtracter("<meta>_description"),
             ),
-            ("meta_description_vect", vectorizer),
+            ("meta_description_vect", TfidfVectorizer(sublinear_tf=True, max_features=max_features)),
         ],
         "meta_keywords_text": [
             ("extract_meta_keywords", DataFrameColumnExtracter("<meta>_keywords")),
-            ("meta_keywords_vect", vectorizer),
+            ("meta_keywords_vect", TfidfVectorizer(sublinear_tf=True, max_features=max_features)),
         ],
         "meta_title_text": [
             ("extract_meta_title", DataFrameColumnExtracter("<meta>_title")),
-            ("meta_title_vect", vectorizer),
+            ("meta_title_vect", TfidfVectorizer(sublinear_tf=True, max_features=max_features)),
         ],
         "p_text": [
             ("extract_p", DataFrameColumnExtracter("<p>")),
-            ("p_vect", vectorizer),
+            ("p_vect", TfidfVectorizer(sublinear_tf=True, max_features=max_features)),
         ],
         "strong_text": [
             ("extract_strong", DataFrameColumnExtracter("<strong>")),
-            ("strong_vect", vectorizer),
+            ("strong_vect", TfidfVectorizer(sublinear_tf=True, max_features=max_features)),
         ],
         "title_text": [
             ("extract_title", DataFrameColumnExtracter("<title>")),
-            ("title_vect", vectorizer),
+            ("title_vect", TfidfVectorizer(sublinear_tf=True, max_features=max_features)),
         ],
     }
 
@@ -716,7 +716,7 @@ def get_experiment_pipeline(
                         [
                             ("plain", FNPipeline(texts["plain_text"])),
                             ("li", FNPipeline(texts["li_text"])),
-            
+
                         ],
                         n_jobs=n_jobs,
                     ),
@@ -732,7 +732,7 @@ def get_experiment_pipeline(
                     FeatureUnion(
                         [
                             ("li", FNPipeline(texts["li_text"])),
-            
+
                         ],
                         n_jobs=n_jobs,
                     ),
@@ -939,11 +939,10 @@ def main(args):
         LOOP_TIME = time.time()
 
         OUTPUT_NAME = f"_{EXPERIMENT['name']}_{model_name}"
-        VECTORIZER = TfidfVectorizer(sublinear_tf=True, max_features=MAX_FEATURES)
 
         ### Experiment setup ###
         pipe = get_experiment_pipeline(
-            EXPERIMENT_N, model_name, model_obj, TEXT_COL, VECTORIZER, N_JOBS
+            EXPERIMENT_N, model_name, model_obj, TEXT_COL, MAX_FEATURES, N_JOBS
         )
 
         ### Training ###
