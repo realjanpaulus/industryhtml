@@ -1,30 +1,14 @@
 # industryhtml
-Classify industries by a companies start HTML page.
 
-## dataset
+> :exclamation: The code and experiments in this repository were developed in the middle of 2021as part of an university project and may therefore be outdated.
 
-The industries dataset has to be in a folder `data` with the name: `data.ndjson`. It can be transformed to a train/test csv with `dataset_pipline.py` in the `app` directory.
+Automatic classification of industries by a companies start HTML page.
 
-## project structure
 
-- **app**
-    - `clf_pipeline.py`: for the classification experiments
-    - `dataset_pipeline.py`: for the preparation of the train and test dataset
-    - `experiments.json`: contains the informations about the experiments. Important for `clf_pipeline.py`
-    - `utils.py`: contains helper functions
-- **data**
-    - should contain: `data.ndjson` (see section **dataset**)
-    - `cptesturls.txt`: URLs for a deterministic train/test split for the POS experiments
-    - `ctesturls.txt`: URLs for a deterministic train/test split for the unchanged text content experiments
-    - `industries.csv`: contains the industries labels from LinkedIn
-- **notebooks**
-    - `dataset_insights.ipynb`: for the creation of dataset insight plot
-    - `evaluation.ipynb`: for the creation of evaluation tables and plots
-- **results**. contains the results of the different experiments
 
-## Usage
+## Getting started
 
-### clf_pipeline
+### `industryhtml/clf_pipeline`
 
 ```sh
 python clf_pipeline.py -h
@@ -63,7 +47,7 @@ optional arguments:
                         corpus and no tunable parameters.
 ```
 
-### dataset_pipeline
+### `industryhtml/dataset_pipeline`
 
 ```sh
 python dataset_pipeline.py -h
@@ -98,3 +82,31 @@ optional arguments:
   --use_test_txt, -utt  Indicates if the train test split should be
                         performed on the basis of an existing txt file.
 ```
+
+
+## About
+
+### Dataset
+
+The industries dataset has to be in a folder `data` with the name: `data.ndjson`. It can be transformed to a train/test csv with `dataset_pipline.py` in the `app` directory.
+
+### Project structure
+
+#### `industryhtml`
+
+- `clf_pipeline.py`: for the classification experiments
+- `dataset_pipeline.py`: for the preparation of the train and test dataset
+- `experiments.json`: contains the informations about the experiments. Important for `clf_pipeline.py`
+- `utils.py`: contains helper functions
+
+#### `data`
+
+- should contain: `data.ndjson` (see section **Dataset**)
+- `cptesturls.txt`: URLs for a deterministic train/test split for the POS experiments
+- `ctesturls.txt`: URLs for a deterministic train/test split for the unchanged text content experiments
+- `industries.csv`: contains the industries labels from LinkedIn
+
+#### `notebooks`
+
+- `dataset_insights.ipynb`: for the creation of dataset insight plot
+- `evaluation.ipynb`: for the creation of evaluation tables and plots
