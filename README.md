@@ -1,6 +1,6 @@
 # industryhtml
 
-> :exclamation: The code and experiments in this repository were developed in the middle of 2021as part of an university project and may therefore be outdated.
+> :exclamation: The code and experiments in this repository were developed in the middle of 2021 as part of an university project and may therefore be outdated.
 
 Automatic classification of industries by a companies start HTML page.
 
